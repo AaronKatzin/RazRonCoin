@@ -1,3 +1,5 @@
+const getMerkleRoot = require("..\\merkle.js").getMerkleRoot;
+
 const {
     Blockchain,
     Transaction
@@ -5,6 +7,7 @@ const {
 const Merkle = require("..\\merkle.js").Merkle;
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
+
 
 const mykey =
     ec.keyFromPrivate('50c963fdb1557d9caa85be8e8c8846dc31b1af8fb9d2e9e2cdf13d758a325030')
@@ -32,6 +35,4 @@ console.log();
 console.log('Blockchain valid?', micaChain.isChainValide() ? 'yes' : 'no');
 console.log(JSON.stringify(micaChain, null, 4));
 
-merkle = new Merkle(micaChain.chain[1]);
-
-console.log("merkle root of first block: ", merkle.merkleRoot);
+console.log("merkle root of first block: ", getMerkleRoot(micaChain.chain[1]));
