@@ -44,23 +44,23 @@ BloomFilter.prototype.add = function(data){
 	}
 }
 
-//For visualization. Return the bitview's length.
-BloomFilter.prototype.bytelength = function(){
+
+BloomFilter.prototype.bytelength = function(){ //For visualization return bitview length
 	return this.bitview.length();
 }
 
-//Return the bitview object.
-BloomFilter.prototype.view = function(){
+
+BloomFilter.prototype.view = function(){ //return a serialized object
 	return this.bitview.view();
 }
 
-//Return a serialized object.
-BloomFilter.prototype.serialize = function(){
+
+BloomFilter.prototype.serialize = function(){ //serialized object
 	return JSON.stringify(this);
 }
 
-//deserialize from json.
-BloomFilter.deserialize = function(serialized){
+
+BloomFilter.deserialize = function(serialized){//deserializing from json.
 	var data = JSON.parse(serialized);
 	var filter = new BloomFilter();
 	filter.b = data.b;
