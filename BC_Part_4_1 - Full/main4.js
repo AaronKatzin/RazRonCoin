@@ -15,7 +15,7 @@ const myWalletAddress = mykey.getPublic('hex');
 const micaChain = new Blockchain();
 const tx1 = new Transaction(myWalletAddress, 'address2', 7);
 tx1.signTransaction(mykey);
-micaChain.addTransaction(tx1);
+micaChain.addTransaction(tx1,mykey);
 micaChain.minePendingTransaction(myWalletAddress);
 
 console.log();
@@ -23,7 +23,7 @@ console.log('Balance of mica is', micaChain.getBalanceOfAddress(myWalletAddress)
 
 const tx2 = new Transaction(myWalletAddress, 'address1', 2);
 tx2.signTransaction(mykey);
-micaChain.addTransaction(tx2);
+micaChain.addTransaction(tx2,mykey);
 micaChain.minePendingTransaction(myWalletAddress);
 
 console.log();

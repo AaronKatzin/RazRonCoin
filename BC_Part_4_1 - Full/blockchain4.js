@@ -1,6 +1,10 @@
 const SHA256 = require("crypto-js/sha256");
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
+
+const MAX_TX_PER_BLOCK = 4;
+const eaterAddress = '0xDEAD';
+
 class Transaction {
     constructor(fromAddress, toAddress, amount) {
         this.fromAddress = fromAddress;
@@ -34,12 +38,13 @@ class Transaction {
 
 
 class Block {
-    constructor(timestamp, transactions, previousHash = '') {
+    constructor(timestamp, transactions, previousHash = '', previousNumber = -1) {
         this.previousHash = previousHash;
         this.timestamp = timestamp;
-        this.transactions = transactions
+        this.transactions = transactions;
         this.hash = this.calculateHash();
         this.nonce = 0;
+        this.number = previousNumber + 1;
     }
 
     calculateHash() {
@@ -67,7 +72,9 @@ class Blockchain {
         this.chain = [this.createGenesisBlock()];
         this.difficulty = 2;
         this.pendingTransactions = [];
-        this.miningReward = 100;
+        this.pendingBurnTransactions = [];
+        this.miningReward = 10;
+        this.maxTXPerBlock = 4;
 
     }
 
@@ -86,13 +93,21 @@ class Blockchain {
     }*/
     minePendingTransaction(miningRewardAddress) {
         const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
-        this.pendingTransactions.push(rewardTx);
-        let block = new Block(Date.now(), this.pendingTransactions, this.getLatestBlock().hash);
+        const transactionsForBlock = []
+        transactionsForBlock.push(rewardTx);
+        // get first k pending transactions, k is number of allowed transactions per block minus one to leave space for the reward tx  
+        for (let i = 0; i < this.maxTXPerBlock - 1 && this.pendingTransactions.length; i++){
+            const pending = this.pendingTransactions.shift();
+            const toBurn = this.pendingBurnTransactions.shift();
+            transactionsForBlock.push(pending);
+            console.log("Adding from pending: ", pending);
+            transactionsForBlock.push(toBurn);
+            console.log("Adding from burn: ", toBurn);
+        }
+        let block = new Block(Date.now(), transactionsForBlock, this.getLatestBlock().hash, this.getLatestBlock().number);
         block.mineBlock(this.difficulty);
         console.log('block succefully mined');
         this.chain.push(block);
-        //this.pendingTransactions = [new Transaction(null, miningRewardAddress, this.miningReward)];
-        this.pendingTransactions = []
     }
     getBalanceOfAddress(address) {
         let balance = 0;
@@ -108,11 +123,20 @@ class Blockchain {
         }
         return balance;
     }
+
+
+    burn(key, amount) {
+        const fromWalletAddress = key.getPublic('hex');
+        const tx = new Transaction(fromWalletAddress, eaterAddress, amount);
+        tx.signTransaction(key);
+        this.pendingBurnTransactions.push(tx);
+    }
+
     /************ add transaction */
     //creatTransaction(transaction) { 
     //    this.pendingTransactions.push(transaction);
     //}
-    addTransaction(transaction) {
+    addTransaction(transaction, key) {
         if (!transaction.fromAddress || !transaction.toAddress) {
             throw new Error('Transaction must include from and to address');
         }
@@ -120,6 +144,7 @@ class Blockchain {
             throw new Error('Cannot add invalide transaction to cahin');
         }
         this.pendingTransactions.push(transaction);
+        this.burn(key, this.getLatestBlock().number + 1);
     }
 
     isChainValide() {
