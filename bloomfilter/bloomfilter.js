@@ -50,7 +50,7 @@ BloomFilter.prototype.bytelength = function(){ //For visualization return bitvie
 }
 
 
-BloomFilter.prototype.view = function(){ //return a serialized object
+BloomFilter.prototype.view = function(){ 
 	return this.bitview.view();
 }
 
