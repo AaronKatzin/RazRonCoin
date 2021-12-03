@@ -21,7 +21,7 @@ function getMerkleRoot(block){
     while (hashes.length > 1) {
         // deal with odd number of hashes by duplicating one of them
         if (hashes.length & 1) {
-            hashes.push(hashes.at(-1));
+            hashes.push(hashes[-1]);
         }
         let nextLevel = [];
         // calculate next level of hashes
