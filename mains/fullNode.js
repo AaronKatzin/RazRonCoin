@@ -1,0 +1,134 @@
+const {
+    Blockchain,
+    Transaction
+} = require('..\\BC_Part_4_1 - Full\\Blockchain4.js');
+const Merkle = require("..\\merkle.js").Merkle;
+const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
+const ec = new EC('secp256k1');
+const saveListToFile = require("..\\serialize.js").saveListToFile;
+const loadFileToList = require("..\\serialize.js").loadFileToList;
+
+const topology = require('..\\BC_Part_5 p2p\\BC_Part_5 p2p\\node_modules\\fully-connected-topology')
+const {
+    stdin,
+    exit,
+    argv
+} = process
+const {
+    log
+} = console
+const {
+    me,
+    peers
+} = extractPeersAndMyPort()
+const sockets = {}
+
+log('---------------------')
+log('Starting up FULL NODE')
+log('me - ', me)
+log('peers - ', peers)
+log('connecting to peers...')
+
+const myIp = toLocalIp(me)
+const peerIps = getPeerIps(peers)
+const micaChain = new Blockchain();
+
+//connect to peers
+topology(myIp, peerIps).on('connection', (socket, peerIp) => {
+    const peerPort = extractPortFromIp(peerIp)
+    log('connected to peer - ', peerPort)
+
+    sockets[peerPort] = socket
+    stdin.on('data', data => { //on user input
+        const message = data.toString().trim()
+        if (message === 'exit') { //on exit
+            log('Bye bye')
+            exit(0)
+        }
+
+        const receiverPeer = extractReceiverPeer(message)
+        if (sockets[receiverPeer]) { //message to specific peer
+            if (peerPort === receiverPeer) { //write only once
+                sockets[receiverPeer].write(formatMessage(extractMessageToSpecificPeer(message)))
+            }
+        } else { //broadcast message to everyone
+            socket.write(formatMessage(message))
+        }
+    })
+
+    //print data when received
+    socket.on('data', data => receivedTransaction(data))
+})
+
+function receivedData(data){
+    console.log("received message: ",extractMessage(data.toString()))
+    const mesage = extractMessage(data.toString());
+    const jsonObj = JSON.parse(mesage);
+    // check if received a transaction object
+    
+    console.log("jsonObj: ", jsonObj);
+    console.log("message type: ", jsonObj["type"]);
+    console.log("jsonObj keys: ", Object.keys(jsonObj));
+    if(jsonObj.type === 'transaction'){
+        console.log("received transaction request: ", jsonObj.data)
+        receivedTransaction(jsonObj.data);
+    }
+    // if(jsonObj.hasOwnProperty('fromAddress') && jsonObj.hasOwnProperty('toAddress') && jsonObj.hasOwnProperty('timestamp') && jsonObj.hasOwnProperty('signature')){
+    //     receivedTransaction(data);
+    // }
+}
+
+function receivedTransaction(data){
+    console.log("received json: ",JSON.parse(extractMessage(data.toString())));
+    receivedTX = Transaction.class(JSON.parse(extractMessage(data.toString())));
+    micaChain.pendingTransactions = loadFileToList("..\\pending_transaction.json");
+    micaChain.pendingBurnTransactions = loadFileToList("..\\pending_burn_transaction.json");
+    // TODO validate
+    console.log("received TX: ", receivedTX)
+    micaChain.pendingTransactions.push(receivedTX);
+    saveListToFile(micaChain.pendingTransactions,"..\\pending_transaction.json");
+    saveListToFile(micaChain.pendingBurnTransactions,"..\\pending_burn_transaction.json");
+}
+
+
+//extract ports from process arguments, {me: first_port, peers: rest... }
+function extractPeersAndMyPort() {
+    return {
+        me: argv[2],
+        peers: argv.slice(3, argv.length)
+    }
+}
+
+//'4000' -> '127.0.0.1:4000'
+function toLocalIp(port) {
+    return `127.0.0.1:${port}`
+}
+
+//['4000', '4001'] -> ['127.0.0.1:4000', '127.0.0.1:4001']
+function getPeerIps(peers) {
+    return peers.map(peer => toLocalIp(peer))
+}
+
+//'hello' -> 'myPort:hello'
+function formatMessage(message) {
+    return `${me}>${message}`
+}
+
+//'127.0.0.1:4000' -> '4000'
+function extractPortFromIp(peer) {
+    return peer.toString().slice(peer.length - 4, peer.length);
+}
+
+//'4000>hello' -> '4000'
+function extractReceiverPeer(message) {
+    return message.slice(0, 4);
+}
+
+//'4000>hello' -> 'hello'
+function extractMessageToSpecificPeer(message) {
+    return message.slice(5, message.length);
+}
+
+function extractMessage(message){
+    return message.substring(message.indexOf(">")+1,  message.length);
+}
