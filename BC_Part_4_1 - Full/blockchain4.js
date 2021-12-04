@@ -4,6 +4,7 @@ const ec = new EC('secp256k1');
 
 const MAX_TX_PER_BLOCK = 4;
 const eaterAddress = '0xDEAD';
+const BEGINNING_BALANCE = 100;
 
 class Transaction {
     constructor(fromAddress, toAddress, amount, timestamp=null, signature=null) {
@@ -120,7 +121,7 @@ class Blockchain {
         this.chain.push(block);
     }
     getBalanceOfAddress(address) {
-        let balance = 0;
+        let balance = BEGINNING_BALANCE;
         for (const block of this.chain) {
             for (const trans of block.transactions) {
                 if (trans.fromAddress === address) {
@@ -151,7 +152,12 @@ class Blockchain {
             throw new Error('Transaction must include from and to address');
         }
         if (!transaction.isValid()) {
-            throw new Error('Cannot add invalide transaction to cahin');
+            throw new Error('Cannot add invalid transaction to chain');
+        }
+        const balance = this.getBalanceOfAddress(transaction.fromAddress);
+        // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
+        if(balance < transaction.amount){ // TODO: calculate fee as well
+            throw new Error('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount);
         }
         this.pendingTransactions.push(transaction);
         this.burn(key, this.getLatestBlock().number + 1);
