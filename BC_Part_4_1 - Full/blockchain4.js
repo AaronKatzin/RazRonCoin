@@ -56,7 +56,6 @@ class Block {
         var bloom = require('./bloomfilter.js');
 
         this.previousHash = previousHash;
-        this.timestamp = timestamp;
         this.transactions = transactions;
         this.hash = this.calculateHash();
         this.nonce = 0;
@@ -72,8 +71,10 @@ class Block {
     }
 
 
-    BloomFilterTransactionCheck(transactionID) {
+    BloomFilterTransactionCheck(transactionID) { //checks if a transaction exists using the bloom filter (still needs the merkle tree application after it returns true)
         
+        //to do use the merkel root function maybe send the block to this function as well and and compare it's merkel roots to getMerkleRoot(this)?
+
         return this.filter.test(transactionID);
     }
 
