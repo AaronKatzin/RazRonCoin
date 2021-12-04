@@ -6,11 +6,16 @@ const MAX_TX_PER_BLOCK = 4;
 const eaterAddress = '0xDEAD';
 
 class Transaction {
-    constructor(fromAddress, toAddress, amount) {
+    constructor(fromAddress, toAddress, amount, timestamp=null, signature=null) {
         this.fromAddress = fromAddress;
         this.toAddress = toAddress;
         this.amount = amount;
-        this.timestamp = Date.now();
+        if(!timestamp){
+            this.timestamp = Date.now();
+        } else{
+            this.timestamp = timestamp;
+        }
+        this.signature = signature;
     }
 
     calculateHash() {
@@ -32,6 +37,11 @@ class Transaction {
         const publicKey = ec.keyFromPublic(this.fromAddress, 'hex');
         return publicKey.verify(this.calculateHash(), this.signature);
     }
+
+    static class(obj) {
+        const tx = new Transaction(obj.fromAddress, obj.toAddress, obj.amount, obj.timestamp, obj.signature);
+        return tx;
+      }
 }
 
 
