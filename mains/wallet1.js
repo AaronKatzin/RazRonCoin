@@ -55,10 +55,12 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
         if(!sending){
             const receiverPeer = extractReceiverPeer(message)
             if (message === 'send') { // user wants to send money
-                //const amount = prompt('How much would you like to send?');
-                //const toAddress = prompt("To what address should it be sent?")
                 sending = true;
                 sendTransaction(socket);
+            }
+            else if (message === 'balance') { // user wants to see his balance
+                console.log("requesting balance by sending: ", formatMessage("{\"balanceOfAddress\":"+ myWalletAddress +"}"))
+                socket.write(formatMessage("{\"balanceOfAddress\":\""+ myWalletAddress +"\"}"))
             }
             else if (sockets[receiverPeer]) { //message to specific peer
                 if (peerPort === receiverPeer) { //write only once

@@ -57,16 +57,20 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
     })
 
     //print data when received
-    socket.on('data', data => receivedData(data))
+    socket.on('data', data => receivedData(data, socket))
 })
 
-function receivedData(data){
+function receivedData(data, socket){
     const jsonObj = JSON.parse(extractMessage(data.toString()))
 
     // check if it's a transaction
     if(jsonObj.fromAddress && jsonObj.toAddress && jsonObj.timestamp && jsonObj.signature){
         console.log('in if!!')
         receivedTransaction(data);
+    }
+    if(jsonObj.balanceOfAddress){
+        console.log("responding with balance: ", micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress));
+        socket.write(formatMessage(micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)));
     }
 }
 
