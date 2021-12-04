@@ -33,6 +33,13 @@ const myIp = toLocalIp(me)
 const peerIps = getPeerIps(peers)
 const micaChain = new Blockchain();
 
+setInterval(func1, 10000);
+
+function func1(){
+    console.log("here");
+    micaChain.minePendingTransaction();
+}
+
 //connect to peers
 topology(myIp, peerIps).on('connection', (socket, peerIp) => {
     const peerPort = extractPortFromIp(peerIp)
@@ -82,6 +89,8 @@ function receivedTransaction(data){
     // TODO validate
     console.log("received TX: ", receivedTX)
     micaChain.pendingTransactions.push(receivedTX);
+    const fee = micaChain.getLatestBlock().number + 1
+    micaChain.burn(receivedTX.fromAddress, fee)
     saveListToFile(micaChain.pendingTransactions,"..\\pending_transaction.json");
     saveListToFile(micaChain.pendingBurnTransactions,"..\\pending_burn_transaction.json");
 }

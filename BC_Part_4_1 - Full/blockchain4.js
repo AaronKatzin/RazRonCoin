@@ -1,11 +1,43 @@
 const SHA256 = require("crypto-js/sha256");
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
+const fs = require('fs');
 
 const MAX_TX_PER_BLOCK = 4;
 const eaterAddress = '0xDEAD';
 const BEGINNING_BALANCE = 100;
 
+function saveListToFile(list, file){
+    // console.log("received list to save: ", list);
+    const jsonified = JSON.stringify(list);
+    try {
+        fs.writeFileSync(file, jsonified);
+        // console.log("JSON data is saved to file:\n", jsonified);
+    } catch (error) {
+        console.error("Failed to save list due to: ", err);
+    }
+    /*for(var obj in list){
+        const jsonified = JSON.stringify(list[obj]);
+        console.log("converting to JSON: ", list[obj]); 
+        try {
+            fs.writeFileSync(file, jsonified);
+            console.log("JSON data is saved to file:\n", jsonified);
+        } catch (error) {
+            console.error(err);
+        }
+    }*/
+}
+
+function loadFileToList(file){
+    // load JSON Object list
+    const objectList = JSON.parse(fs.readFileSync(file));
+    const txList = [];
+    //convert to strongly-typed transactions 
+    for(obj in objectList){
+        txList.push(Transaction.class(objectList[obj]));
+    }
+    return txList;
+}
 
 class Transaction {
     constructor(fromAddress, toAddress, amount, timestamp=null, signature=null) {
@@ -61,12 +93,12 @@ class Block {
         this.nonce = 0;
         this.number = previousNumber + 1;
 
-        this.filter = new bloom(transactions.length);  //creates and populates a bloomfilter with the transactions
-        for (var i = 0; i < transactions.length; i++)
-        {
-            this.filter.add(transactions[i]);
-            
-        }
+        // this.filter = new bloom(transactions.length);  //creates and populates a bloomfilter with the transactions
+        // for (var i = 0; i < transactions.length; i++)
+        // {
+        //     this.filter.add(transactions[i]);
+        //     
+        // }
         
     }
 
@@ -131,23 +163,37 @@ class Blockchain {
         newBlock.mineBlock(this.difficulty);
         this.chain.push(newBlock);
     }*/
-    minePendingTransaction(miningRewardAddress) {
-        const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
-        const transactionsForBlock = []
-        transactionsForBlock.push(rewardTx);
-        // get first k pending transactions, k is number of allowed transactions per block minus one to leave space for the reward tx  
-        for (let i = 0; i < this.maxTXPerBlock - 1 && this.pendingTransactions.length; i++){
-            const pending = this.pendingTransactions.shift();
-            const toBurn = this.pendingBurnTransactions.shift();
-            transactionsForBlock.push(pending);
-            console.log("Adding from pending: ", pending);
-            transactionsForBlock.push(toBurn);
-            console.log("Adding from burn: ", toBurn);
+    minePendingTransaction(miningRewardAddress = eaterAddress) {
+        console.log("mining pending transactions");
+        // load pending transactions from mempool
+        this.pendingTransactions = loadFileToList("..\\pending_transaction.json");
+        this.pendingBurnTransactions = loadFileToList("..\\pending_burn_transaction.json");
+        
+        if(this.pendingTransactions.length){
+            console.log("Found pending transactions to mine")
+            const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
+            const transactionsForBlock = []
+            transactionsForBlock.push(rewardTx);
+            // get first k pending transactions, k is number of allowed transactions per block minus one to leave space for the reward tx  
+            for (let i = 0; i < this.maxTXPerBlock - 1 && this.pendingTransactions.length; i++){
+                const pending = this.pendingTransactions.shift();
+                const toBurn = this.pendingBurnTransactions.shift();
+                transactionsForBlock.push(pending);
+                console.log("Adding from pending: ", pending);
+                transactionsForBlock.push(toBurn);
+                console.log("Adding from burn: ", toBurn);
+            }
+            let block = new Block(Date.now(), transactionsForBlock, this.getLatestBlock().hash, this.getLatestBlock().number);
+            block.mineBlock(this.difficulty);
+            console.log('block succefully mined');
+            this.chain.push(block);
+            // save remaining pending transactions from mempool
+            saveListToFile(this.pendingTransactions,"..\\pending_transaction.json");
+            saveListToFile(this.pendingBurnTransactions,"..\\pending_burn_transaction.json");
         }
-        let block = new Block(Date.now(), transactionsForBlock, this.getLatestBlock().hash, this.getLatestBlock().number);
-        block.mineBlock(this.difficulty);
-        console.log('block succefully mined');
-        this.chain.push(block);
+        else{
+            console.log("No pending transactions to mine")
+        }
     }
     getBalanceOfAddress(address) {
         let balance = BEGINNING_BALANCE;
