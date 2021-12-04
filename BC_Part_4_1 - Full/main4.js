@@ -7,6 +7,8 @@ const {
 const Merkle = require("..\\merkle.js").Merkle;
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
+const saveListToFile = require("..\\serialize.js").saveListToFile;
+const loadFileToList = require("..\\serialize.js").loadFileToList;
 
 
 const mykey =
@@ -16,6 +18,13 @@ const micaChain = new Blockchain();
 const tx1 = new Transaction(myWalletAddress, 'address2', 7);
 tx1.signTransaction(mykey);
 micaChain.addTransaction(tx1,mykey);
+const tx3 = new Transaction(myWalletAddress, 'address2', 10);
+tx3.signTransaction(mykey);
+micaChain.addTransaction(tx3,mykey);
+// test serialization and de-serialization
+saveListToFile(micaChain.pendingTransactions,"pending_transaction.json");
+micaChain.pendingTransactions = loadFileToList("pending_transaction.json");
+// END test serialization and de-serialization
 micaChain.minePendingTransaction(myWalletAddress);
 
 console.log();
