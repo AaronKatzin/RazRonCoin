@@ -6,6 +6,7 @@ const MAX_TX_PER_BLOCK = 4;
 const eaterAddress = '0xDEAD';
 const BEGINNING_BALANCE = 100;
 
+
 class Transaction {
     constructor(fromAddress, toAddress, amount, timestamp=null, signature=null) {
         this.fromAddress = fromAddress;
@@ -49,13 +50,31 @@ class Transaction {
 
 
 class Block {
+    
     constructor(timestamp, transactions, previousHash = '', previousNumber = -1) {
+
+        var bloom = require('./bloomfilter.js');
+
         this.previousHash = previousHash;
         this.timestamp = timestamp;
         this.transactions = transactions;
         this.hash = this.calculateHash();
         this.nonce = 0;
         this.number = previousNumber + 1;
+
+        this.filter = new bloom(transactions.length);  //creates and populates a bloomfilter with the transactions
+        for (var i = 0; i < transactions.length; i++)
+        {
+            this.filter.add(transactions[i]);
+            
+        }
+        
+    }
+
+
+    BloomFilterTransactionCheck(transactionID) {
+        
+        return this.filter.test(transactionID);
     }
 
     calculateHash() {

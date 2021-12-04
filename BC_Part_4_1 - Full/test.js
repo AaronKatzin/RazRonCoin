@@ -10,7 +10,6 @@ filter.add("aaron");
 filter.add("banana");
 filter.add("apple");
 
-
 console.log(filter.test("apple"));	//true		
 console.log(filter.test("orange"));	//false
 console.log(filter.test("razi"));	//true
