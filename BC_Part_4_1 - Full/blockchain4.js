@@ -93,12 +93,12 @@ class Block {
         this.nonce = 0;
         this.number = previousNumber + 1;
 
-        // this.filter = new bloom(transactions.length);  //creates and populates a bloomfilter with the transactions
-        // for (var i = 0; i < transactions.length; i++)
-        // {
-        //     this.filter.add(transactions[i]);
-        //     
-        // }
+        this.filter = new bloom(transactions.length);  //creates and populates a bloomfilter with the transactions
+        for (var i = 0; i < transactions.length; i++)
+        {
+            this.filter.add(transactions[i]);
+            
+        }
         
     }
 
