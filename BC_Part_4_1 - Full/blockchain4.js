@@ -75,7 +75,15 @@ class Block {
         
         //to do use the merkel root function maybe send the block to this function as well and and compare it's merkel roots to getMerkleRoot(this)?
 
-        return this.filter.test(transactionID);
+        if (!(this.filter.test(transactionID)))
+            return false;
+        else
+            for (var i = 0; i < this.transactions.length; i++){ //this part is just a place holder for now needs to be done with merkel tree and merkel root application
+                if (this.transactions[i] == transactionID)
+                    return true;
+            }
+        return false;
+            
     }
 
     calculateHash() {
