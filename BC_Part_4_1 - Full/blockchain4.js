@@ -156,11 +156,12 @@ class Blockchain {
         }
         const balance = this.getBalanceOfAddress(transaction.fromAddress);
         // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
-        if(balance < transaction.amount){ // TODO: calculate fee as well
+        const fee = this.getLatestBlock().number + 1;
+        if(balance < transaction.amount + fee){ 
             throw new Error('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount);
         }
         this.pendingTransactions.push(transaction);
-        this.burn(key, this.getLatestBlock().number + 1);
+        this.burn(key, fee);
     }
 
     isChainValide() {
