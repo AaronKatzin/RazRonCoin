@@ -119,8 +119,10 @@ class Block {
     }
 
     calculateHash() {
-        return SHA256(this.previousHash + this.timestamp +
-            JSON.stringify(this.transactions) + this.nonce).toString();
+        return getMerkleRoot(this);
+        //SHA256(this.previousHash + this.timestamp +
+            //JSON.stringify(this.transactions) + this.nonce).toString();
+        //old code we're supposed to calculate the hash using merkel root
     }
     mineBlock(difficulty) {
         while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join('0')) {
