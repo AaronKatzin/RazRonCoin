@@ -57,25 +57,17 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
     })
 
     //print data when received
-    socket.on('data', data => receivedTransaction(data))
+    socket.on('data', data => receivedData(data))
 })
 
 function receivedData(data){
-    console.log("received message: ",extractMessage(data.toString()))
-    const mesage = extractMessage(data.toString());
-    const jsonObj = JSON.parse(mesage);
-    // check if received a transaction object
-    
-    console.log("jsonObj: ", jsonObj);
-    console.log("message type: ", jsonObj["type"]);
-    console.log("jsonObj keys: ", Object.keys(jsonObj));
-    if(jsonObj.type === 'transaction'){
-        console.log("received transaction request: ", jsonObj.data)
-        receivedTransaction(jsonObj.data);
+    const jsonObj = JSON.parse(extractMessage(data.toString()))
+
+    // check if it's a transaction
+    if(jsonObj.fromAddress && jsonObj.toAddress && jsonObj.timestamp && jsonObj.signature){
+        console.log('in if!!')
+        receivedTransaction(data);
     }
-    // if(jsonObj.hasOwnProperty('fromAddress') && jsonObj.hasOwnProperty('toAddress') && jsonObj.hasOwnProperty('timestamp') && jsonObj.hasOwnProperty('signature')){
-    //     receivedTransaction(data);
-    // }
 }
 
 function receivedTransaction(data){
