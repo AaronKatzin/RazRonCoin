@@ -105,6 +105,7 @@ class Block {
         }
         return true;
     }
+    
 }
 class Blockchain {
     constructor() {
@@ -164,10 +165,8 @@ class Blockchain {
     }
 
 
-    burn(key, amount) {
-        const fromWalletAddress = key.getPublic('hex');
-        const tx = new Transaction(fromWalletAddress, eaterAddress, amount);
-        tx.signTransaction(key);
+    burn(fromAddress, feeAmount) {
+        const tx = new Transaction(fromAddress, eaterAddress, feeAmount);
         this.pendingBurnTransactions.push(tx);
     }
 
@@ -189,7 +188,7 @@ class Blockchain {
             throw new Error('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount);
         }
         this.pendingTransactions.push(transaction);
-        this.burn(key, fee);
+        this.burn(transaction.fromAddress, fee);
     }
 
     isChainValide() {

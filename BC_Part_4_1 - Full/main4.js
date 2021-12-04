@@ -17,13 +17,15 @@ const myWalletAddress = mykey.getPublic('hex');
 const micaChain = new Blockchain();
 const tx1 = new Transaction(myWalletAddress, 'address2', 7);
 tx1.signTransaction(mykey);
-micaChain.addTransaction(tx1,mykey);
+micaChain.addTransaction(tx1);
 const tx3 = new Transaction(myWalletAddress, 'address2', 10);
 tx3.signTransaction(mykey);
-micaChain.addTransaction(tx3,mykey);
+micaChain.addTransaction(tx3);
 // test serialization and de-serialization
 saveListToFile(micaChain.pendingTransactions,"pending_transaction.json");
+saveListToFile(micaChain.pendingBurnTransactions,"pending_burn_transaction.json");
 micaChain.pendingTransactions = loadFileToList("pending_transaction.json");
+micaChain.pendingBurnTransactions = loadFileToList("pending_burn_transaction.json");
 // END test serialization and de-serialization
 micaChain.minePendingTransaction(myWalletAddress);
 
@@ -32,7 +34,7 @@ console.log('Balance of mica is', micaChain.getBalanceOfAddress(myWalletAddress)
 
 const tx2 = new Transaction(myWalletAddress, 'address1', 2);
 tx2.signTransaction(mykey);
-micaChain.addTransaction(tx2,mykey);
+micaChain.addTransaction(tx2);
 micaChain.minePendingTransaction(myWalletAddress);
 
 console.log();
