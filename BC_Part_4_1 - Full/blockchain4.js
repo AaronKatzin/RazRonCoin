@@ -87,7 +87,7 @@ class Block {
 
         var bloom = require('./bloomfilter.js');
 
-        this.previousHash = previousHash;
+        this.previousHash = this.calculatePrevHash(previousHash); //needs testing calculating prev hash
         this.transactions = transactions;
         this.hash = this.calculateHash();
         this.nonce = 0;
@@ -118,8 +118,17 @@ class Block {
             
     }
 
+    calculatePrevHash(previousHash) { //a function for calculating the prev hash not sure if let here might cause an issue if it does change it with var
+        let hashingArray = [];
+        hashingArray[0] = previousHash;
+        hashingArray[1] = this.hash;
+        hashingArray[2] = this.nonce;
+        return getMerkleRootTXArray(hashingArray);
+        
+    }
+
     calculateHash() {
-        return getMerkleRoot(this);
+        return getMerkleRoot(this); //might need to import the merkle.js
         //SHA256(this.previousHash + this.timestamp +
             //JSON.stringify(this.transactions) + this.nonce).toString();
         //old code we're supposed to calculate the hash using merkel root
