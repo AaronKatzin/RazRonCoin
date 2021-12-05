@@ -6,6 +6,8 @@ const fs = require('fs');
 const MAX_TX_PER_BLOCK = 4;
 const eaterAddress = '0xDEAD';
 const BEGINNING_BALANCE = 100;
+import { getMerkleRoot } from "./merkle";
+import { getMerkleRootTXArray } from "./merkle";
 
 function saveListToFile(list, file){
     // console.log("received list to save: ", list);
@@ -266,6 +268,7 @@ class Blockchain {
         return true;
     }
 }
+
 
 module.exports.Blockchain = Blockchain;
 module.exports.Block = Block;
