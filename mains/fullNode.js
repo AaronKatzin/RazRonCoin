@@ -84,11 +84,11 @@ function receivedData(data, socket){
         console.log("Got a request for headers history");
         if(micaChain.chain.length){ // check if blockchain contains any blocks
             for(const block in micaChain.chain){
-                let header = JSON.stringify({"previousHash": String(micaChain.chain[block].previousHash) , "timestamp" : String(micaChain.chain[block].timestamp), "nonce" : String(micaChain.chain[block].nonce), "merkleRoot": String(micaChain.chain[block].merkleRoot)})
+                var header = JSON.stringify({"previousHash": String(micaChain.chain[block].previousHash) , "timestamp" : String(micaChain.chain[block].timestamp), "nonce" : String(micaChain.chain[block].nonce), "merkleRoot": String(micaChain.chain[block].merkleRoot)})
                 socket.write(formatMessage(header));
+                sleep(500);
             }
         }
-        socket.write(formatMessage("END_OF_HEADERS"));
     }
 
 }
@@ -149,3 +149,11 @@ function extractMessageToSpecificPeer(message) {
 function extractMessage(message){
     return message.substring(message.indexOf(">")+1,  message.length);
 }
+
+function sleep(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+      currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+  }

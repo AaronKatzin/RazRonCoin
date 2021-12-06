@@ -36,7 +36,7 @@ const myWalletAddress = mykey.getPublic('hex');
 
 const myIp = toLocalIp(me)
 const peerIps = getPeerIps(peers)
-let sending = false;
+const headers = [];
 
 //connect to peers
 topology(myIp, peerIps).on('connection', (socket, peerIp) => {
@@ -76,8 +76,24 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
     )
 
     //print data when received
-    socket.on('data', data => log(data.toString('utf8')))
+    socket.on('data', data => receivedData(data, socket))
 })
+
+function receivedData(data, socket){
+    console.log("data.toString(): ", data.toString())
+    const jsonObj = JSON.parse(extractMessage(data.toString()))
+
+    // check if it's a transaction
+    if(jsonObj.previousHash && jsonObj.timestamp && jsonObj.nonce && jsonObj.merkleRoot){
+        console.log('Adding header to array: ', jsonObj)
+        headers.push(jsonObj)
+    }
+
+}
+
+function extractMessage(message){
+    return message.substring(message.indexOf(">")+1,  message.length);
+}
 
 function sendTransaction(socket, amount, toAddress){
     const tx1 = new Transaction(myWalletAddress,  toAddress, amount);
@@ -118,10 +134,6 @@ function extractPortFromIp(peer) {
 //'4000>hello' -> '4000'
 function extractReceiverPeer(message) {
     return message.slice(0, 4);
-}
-
-function extractMessage(message){
-    return messge.substring(str.indexOf(">"),  messge.length)
 }
 
 //'4000>hello' -> 'hello'
