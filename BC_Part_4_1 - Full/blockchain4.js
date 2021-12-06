@@ -92,6 +92,11 @@ class Block {
         this.hash = this.calculateHash();
         this.nonce = 0;
         this.number = previousNumber + 1;
+        if(transactions == "Genesis block"){
+            this.merkleRoot = SHA256("Genesis block");
+        } else {
+            this.setMerkleRoot();
+        }
 
         this.filter = new bloom(transactions.length);  //creates and populates a bloomfilter with the transactions
         for (var i = 0; i < transactions.length; i++)
@@ -136,6 +141,36 @@ class Block {
             }
         }
         return true;
+    }
+    setMerkleRoot(){
+    
+        // deal with empty block
+        if (this.transactions.length == 0){
+            return "0";
+        }
+        
+        // create array of hashes of the block transactions
+        let hashes = [];
+        for (const tx of this.transactions) {
+            hashes.push(tx.calculateHash());
+        }
+     
+        // calculate next level of hashes until we get a single hash, aka the root
+        while (hashes.length > 1) {
+            // deal with odd number of hashes by duplicating one of them
+            if (hashes.length & 1) {
+                hashes.push(hashes[-1]);
+            }
+            let nextLevel = [];
+            // calculate next level of hashes
+            for (let i = 0; i < hashes.length; i+=2) { 
+                nextLevel.push(SHA256(hashes[i] + hashes[i+1]).toString());
+            }
+            // replace curr level of hashes with next level of hashes for next while iteration
+            hashes = nextLevel;
+        }
+        // return single hash, aka the root
+        this.merkleRoot = hashes[0];
     }
     
 }

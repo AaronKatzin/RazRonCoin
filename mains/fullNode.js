@@ -2,7 +2,6 @@ const {
     Blockchain,
     Transaction
 } = require('..\\BC_Part_4_1 - Full\\Blockchain4.js');
-const Merkle = require("..\\merkle.js").Merkle;
 const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
 const ec = new EC('secp256k1');
 const saveListToFile = require("..\\serialize.js").saveListToFile;
