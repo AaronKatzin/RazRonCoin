@@ -88,7 +88,7 @@ class Block {
     constructor(timestamp, transactions, previousHash = '', previousNumber = -1, prevMerkleRoot = '', prevNonce = 0) {
 
         var bloom = require('./bloomfilter.js');
-
+        this.timestamp = timestamp;
         this.previousHash = SHA256(previousHash + prevMerkleRoot + prevNonce);
         this.transactions = transactions;
         this.hash = this.calculateHash();
