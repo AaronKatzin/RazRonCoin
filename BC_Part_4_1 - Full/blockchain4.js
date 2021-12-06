@@ -83,11 +83,11 @@ class Transaction {
 
 class Block {
     
-    constructor(timestamp, transactions, previousHash = '', previousNumber = -1) {
+    constructor(timestamp, transactions, previousHash = '', previousNumber = -1, prevMerkleRoot = '', prevNonce = 0) {
 
         var bloom = require('./bloomfilter.js');
 
-        this.previousHash = previousHash;
+        this.previousHash = SHA256(previousHash + prevMerkleRoot + prevNonce);
         this.transactions = transactions;
         this.hash = this.calculateHash();
         this.nonce = 0;
@@ -218,7 +218,7 @@ class Blockchain {
                 transactionsForBlock.push(toBurn);
                 console.log("Adding from burn: ", toBurn);
             }
-            let block = new Block(Date.now(), transactionsForBlock, this.getLatestBlock().hash, this.getLatestBlock().number);
+            let block = new Block(Date.now(), transactionsForBlock, this.getLatestBlock().hash, this.getLatestBlock().number, this.getLatestBlock().merkleRoot, this.getLatestBlock().nonce);
             block.mineBlock(this.difficulty);
             console.log('block succefully mined');
             this.chain.push(block);
