@@ -36,7 +36,6 @@ const myWalletAddress = mykey.getPublic('hex');
 
 const myIp = toLocalIp(me)
 const peerIps = getPeerIps(peers)
-const micaChain = new Blockchain();
 let sending = false;
 
 //connect to peers
