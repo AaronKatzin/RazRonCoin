@@ -39,6 +39,8 @@ function loadFileToList(file){
     return txList;
 }
 
+
+
 class Transaction {
     constructor(fromAddress, toAddress, amount, timestamp=null, signature=null) {
         this.fromAddress = fromAddress;
@@ -290,7 +292,39 @@ class Blockchain {
         return true;
     }
 }
+function getMerkleRootOfTXArray(TXarray){ //instead of giving it a block here we give it a 
+    //tx array
+// deal with empty block
+if (TXarray.length == 0){
+return "0";
+}
 
+// create array of hashes of the block transactions
+let hashes = [];
+for (const tx of TXarray) {
+hashes.push(tx.calculateHash());
+}
+
+// calculate next level of hashes until we get a single hash, aka the root
+while (hashes.length > 1) {
+// deal with odd number of hashes by duplicating one of them
+if (hashes.length & 1) {
+hashes.push(hashes[-1]);
+}
+let nextLevel = [];
+// calculate next level of hashes
+for (let i = 0; i < hashes.length; i+=2) { 
+nextLevel.push(SHA256(hashes[i] + hashes[i+1]).toString());
+}
+// replace curr level of hashes with next level of hashes for next while iteration
+hashes = nextLevel;
+}
+// return single hash, aka the root
+return hashes[0];
+}
+
+module.exports = { getMerkleRootOfTXArray };
 module.exports.Blockchain = Blockchain;
 module.exports.Block = Block;
 module.exports.Transaction = Transaction;
+
