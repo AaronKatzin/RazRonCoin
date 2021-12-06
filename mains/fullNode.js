@@ -74,10 +74,23 @@ function receivedData(data, socket){
         console.log('in if!!')
         receivedTransaction(data);
     }
+     // check if it's a balance request
     if(jsonObj.balanceOfAddress){
         console.log("responding with balance: ", micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress));
         socket.write(formatMessage(micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)));
     }
+    // check if it's a headers request
+    if(jsonObj.getHeaders){
+        console.log("Got a request for headers history");
+        if(micaChain.chain.length){ // check if blockchain contains any blocks
+            for(const block in micaChain.chain){
+                let header = JSON.stringify({"previousHash": String(micaChain.chain[block].previousHash) , "timestamp" : String(micaChain.chain[block].timestamp), "nonce" : String(micaChain.chain[block].nonce), "merkleRoot": String(micaChain.chain[block].merkleRoot)})
+                socket.write(formatMessage(header));
+            }
+        }
+        socket.write(formatMessage("END_OF_HEADERS"));
+    }
+
 }
 
 function receivedTransaction(data){

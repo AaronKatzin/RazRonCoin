@@ -51,15 +51,20 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
             log('Bye bye')
             exit(0)
         }
-        if(!sending){
+
             const receiverPeer = extractReceiverPeer(message)
-            if (message === 'send') { // user wants to send money
-                sending = true;
-                sendTransaction(socket);
+            const splitMessage = message.split(' ')
+            if (splitMessage[0] === 'send') { // user wants to send money
+                sendTransaction(socket, splitMessage[1], splitMessage[2]);
             }
             else if (message === 'balance') { // user wants to see his balance
-                console.log("requesting balance by sending: ", formatMessage("{\"balanceOfAddress\":"+ myWalletAddress +"}"))
-                socket.write(formatMessage("{\"balanceOfAddress\":\""+ myWalletAddress +"\"}"))
+                console.log("requesting balance by sending: ", formatMessage("{\"balanceOfAddress\":"+ myWalletAddress +"}"));
+                socket.write(formatMessage("{\"balanceOfAddress\":\""+ myWalletAddress +"\"}"));
+            }
+            else if(message == 'getHeaders'){
+                const formattedMessage = formatMessage("{\"getHeaders\": \"thanks\"}");
+                console.log("requesting blockchain headers by sending ", formattedMessage);
+                socket.write(formattedMessage);
             }
             else if (sockets[receiverPeer]) { //message to specific peer
                 if (peerPort === receiverPeer) { //write only once
@@ -69,37 +74,17 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
                 socket.write(formatMessage(message))
             }
         }
-    })
+    )
 
     //print data when received
     socket.on('data', data => log(data.toString('utf8')))
 })
 
 function sendTransaction(socket, amount, toAddress){
-    const properties = [
-        {
-            name: 'toAddress',
-            validator: /^[\da-fA-f]+$/,
-            warning: 'address must be only hex numbers'
-        },
-        {
-            name: 'amount',
-            validator: /^[\d]+$/,
-            warning: 'amount must be only numbers'
-        }
-    ];
-    prompt.get(properties, function (err, result) {
-        if (err) { return onErr(err); }
-        console.log('Command-line input received:');
-        console.log('  toAddress: ' + result.toAddress);
-        console.log('  amount: ' + result.amount);
-        const tx1 = new Transaction(myWalletAddress,  result.toAddress, result.amount);
-        tx1.signTransaction(mykey);
-        console.log("sending transaction: ", JSON.stringify(tx1));
-        socket.write(formatMessage(JSON.stringify(tx1)));
-        sending = false;
-    });
-
+    const tx1 = new Transaction(myWalletAddress,  toAddress, amount);
+    tx1.signTransaction(mykey);
+    console.log("sending transaction: ", JSON.stringify(tx1));
+    socket.write(formatMessage(JSON.stringify(tx1)));
 }
 
 
