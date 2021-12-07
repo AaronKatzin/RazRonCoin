@@ -254,30 +254,43 @@ class Blockchain {
     }
 
 
-    burn(fromAddress, feeAmount) {
+    burn(fromAddress, feeAmount, transactionAmount) {
+        const balance = this.getBalanceOfAddress(fromAddress);
+        // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
+        if(balance < transactionAmount + feeAmount){ 
+            console.log('Cannot add burn transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Burn amount: ", feeAmount);
+            return false;
+        }
         const tx = new Transaction(fromAddress, eaterAddress, feeAmount);
         this.pendingBurnTransactions.push(tx);
+        return true;
     }
 
     /************ add transaction */
     //creatTransaction(transaction) { 
     //    this.pendingTransactions.push(transaction);
     //}
-    addTransaction(transaction, key) {
+    addTransaction(transaction) {
         if (!transaction.fromAddress || !transaction.toAddress) {
-            throw new Error('Transaction must include from and to address');
+            console.log('Transaction must include from and to address');
+            return false;
         }
         if (!transaction.isValid()) {
-            throw new Error('Cannot add invalid transaction to chain');
+            console.log('Cannot add invalid transaction to chain');
+            return false;
         }
         const balance = this.getBalanceOfAddress(transaction.fromAddress);
         // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
         const fee = this.getLatestBlock().number + 1;
         if(balance < transaction.amount + fee){ 
-            throw new Error('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount);
+            console.log('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount);
+            return false;
         }
-        this.pendingTransactions.push(transaction);
-        this.burn(transaction.fromAddress, fee);
+        if(this.burn(transaction.fromAddress, fee, transaction.amount)){ // make sure sender has enough money to cover gas fee
+            this.pendingTransactions.push(transaction);
+            return true;
+        }
+        return false;
     }
 
     isChainValide() {
