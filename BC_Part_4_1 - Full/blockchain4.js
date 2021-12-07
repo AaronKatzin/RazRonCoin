@@ -248,23 +248,14 @@ class Blockchain {
         return balance;
     }
     getTotalCoins() {
-        let burned = 0;
-        let subtotal = (this.chain.length - 1) * this.miningReward; // no reward in genesis block
-        for (const block of this.chain) {
-            if(block.transactions != "Genesis block"){
-                for (const trans of block.transactions) {
-                    console.log("transaction: ",trans)
-                    if (trans.toAddress == eaterAddress) { // subtract burnt coins
-                        console.log("burned += ", parseInt(trans.amount));
-                        burned += parseInt(trans.amount);
-                    }
-                }
-            }
-        }
-        
-        console.log("Burned: ", burned)
-        console.log("subtotal: ", subtotal)
-        return subtotal - burned;
+        return this.getTotalMinedCoins() - this.getTotalBurnedCoins();
+    }
+
+    getTotalMinedCoins(){
+        return (this.chain.length - 1) * this.miningReward; // subtract 1 due to no reward in genesis block
+    }
+    getTotalBurnedCoins(){
+        return this.getBalanceOfAddress(eaterAddress) - BEGINNING_BALANCE; // TODO remove subtraction BEGINNING_BALANCE after https://github.com/AaronKatzin/BlockchainHW1/issues/1 is fixed
     }
 
 

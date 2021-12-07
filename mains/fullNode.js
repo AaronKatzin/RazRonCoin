@@ -84,6 +84,16 @@ function receivedData(data, socket){
         console.log("responding with total coins: ", response);
         socket.write(formatMessage(response));
     }
+    else if(jsonObj.getTotalMinedCoins){
+        const response = micaChain.getTotalMinedCoins();
+        console.log("responding with total coins: ", response);
+        socket.write(formatMessage(response));
+    }
+    else if(jsonObj.getTotalBurnedCoins){
+        const response = micaChain.getTotalBurnedCoins();
+        console.log("responding with total coins: ", response);
+        socket.write(formatMessage(response));
+    }
     // check if it's a headers request
     else if(jsonObj.getHeaders){
         console.log("Got a request for headers history");

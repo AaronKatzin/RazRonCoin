@@ -76,6 +76,16 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
                 console.log("requesting blockchain total coins by sending ", formattedMessage);
                 socket.write(formattedMessage);
             }
+            else if(message == 'getTotalMinedCoins'){
+                const formattedMessage = formatMessage("{\"getTotalMinedCoins\": \"thanks\"}");
+                console.log("requesting blockchain total coins by sending ", formattedMessage);
+                socket.write(formattedMessage);
+            }
+            else if(message == 'getTotalBurnedCoins'){
+                const formattedMessage = formatMessage("{\"getTotalBurnedCoins\": \"thanks\"}");
+                console.log("requesting blockchain total coins by sending ", formattedMessage);
+                socket.write(formattedMessage);
+            }
             else if (sockets[receiverPeer]) { //message to specific peer
                 if (peerPort === receiverPeer) { //write only once
                     sockets[receiverPeer].write(formatMessage(extractMessageToSpecificPeer(message)))
