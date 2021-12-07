@@ -21,9 +21,7 @@ tx3.signTransaction(mykey);
 micaChain.addTransaction(tx3);
 // test serialization and de-serialization
 saveListToFile(micaChain.pendingTransactions,"pending_transaction.json");
-saveListToFile(micaChain.pendingBurnTransactions,"pending_burn_transaction.json");
 micaChain.pendingTransactions = loadFileToList("pending_transaction.json");
-micaChain.pendingBurnTransactions = loadFileToList("pending_burn_transaction.json");
 // END test serialization and de-serialization
 micaChain.minePendingTransaction(myWalletAddress);
 

@@ -185,7 +185,6 @@ class Blockchain {
         this.chain = [this.createGenesisBlock()];
         this.difficulty = 2;
         this.pendingTransactions = [];
-        this.pendingBurnTransactions = [];
         this.miningReward = 10;
         this.maxTXPerBlock = 4;
 
@@ -208,7 +207,6 @@ class Blockchain {
         console.log("mining pending transactions");
         // load pending transactions from mempool
         this.pendingTransactions = loadFileToList("..\\pending_transaction.json");
-        this.pendingBurnTransactions = loadFileToList("..\\pending_burn_transaction.json");
         
         if(this.pendingTransactions.length){
             console.log("Found pending transactions to mine")
@@ -218,11 +216,8 @@ class Blockchain {
             // get first k pending transactions, k is number of allowed transactions per block minus one to leave space for the reward tx  
             for (let i = 0; i < this.maxTXPerBlock - 1 && this.pendingTransactions.length; i++){
                 const pending = this.pendingTransactions.shift();
-                const toBurn = this.pendingBurnTransactions.shift();
                 transactionsForBlock.push(pending);
                 console.log("Adding from pending: ", pending);
-                transactionsForBlock.push(toBurn);
-                console.log("Adding from burn: ", toBurn);
             }
             let block = new Block(Date.now(), transactionsForBlock, this.getLatestBlock().hash, this.getLatestBlock().number, this.getLatestBlock().merkleRoot, this.getLatestBlock().nonce);
             block.mineBlock(this.difficulty);
@@ -230,7 +225,6 @@ class Blockchain {
             this.chain.push(block);
             // save remaining pending transactions from mempool
             saveListToFile(this.pendingTransactions,"..\\pending_transaction.json");
-            saveListToFile(this.pendingBurnTransactions,"..\\pending_burn_transaction.json");
             return true;
         }
         else{
@@ -262,7 +256,7 @@ class Blockchain {
             return false;
         }
         const tx = new Transaction(fromAddress, eaterAddress, feeAmount);
-        this.pendingBurnTransactions.push(tx);
+        this.pendingTransactions.push(tx);
         return true;
     }
 

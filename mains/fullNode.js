@@ -101,12 +101,10 @@ function receivedTransaction(data){
     console.log("received json: ",JSON.parse(extractMessage(data.toString())));
     receivedTX = Transaction.class(JSON.parse(extractMessage(data.toString())));
     micaChain.pendingTransactions = loadFileToList("..\\pending_transaction.json");
-    micaChain.pendingBurnTransactions = loadFileToList("..\\pending_burn_transaction.json");
     // TODO validate
     console.log("received TX: ", receivedTX)
     micaChain.addTransaction(receivedTX);
     saveListToFile(micaChain.pendingTransactions,"..\\pending_transaction.json");
-    saveListToFile(micaChain.pendingBurnTransactions,"..\\pending_burn_transaction.json");
 }
 
 
