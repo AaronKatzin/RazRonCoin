@@ -61,6 +61,11 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
                 console.log("requesting balance by sending: ", formatMessage("{\"balanceOfAddress\":"+ myWalletAddress +"}"));
                 socket.write(formatMessage("{\"balanceOfAddress\":\""+ myWalletAddress +"\"}"));
             }
+            else if (splitMessage[0] === 'verify') { // user wants to verify a transaction
+                const toSend = "{\"verify\":\""+ splitMessage[1] +"\"}"
+                console.log("requesting verification of: ", toSend);
+                socket.write(formatMessage(toSend));
+            }
             else if(message == 'getHeaders'){
                 const formattedMessage = formatMessage("{\"getHeaders\": \"thanks\"}");
                 console.log("requesting blockchain headers by sending ", formattedMessage);

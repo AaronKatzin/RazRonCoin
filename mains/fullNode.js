@@ -72,12 +72,12 @@ function receivedData(data, socket){
         receivedTransaction(data);
     }
      // check if it's a balance request
-    if(jsonObj.balanceOfAddress){
+    else if(jsonObj.balanceOfAddress){
         console.log("responding with balance: ", micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress));
         socket.write(formatMessage(micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)));
     }
     // check if it's a headers request
-    if(jsonObj.getHeaders){
+    else if(jsonObj.getHeaders){
         console.log("Got a request for headers history");
         if(micaChain.chain.length){ // check if blockchain contains any blocks
             for(const block in micaChain.chain){
@@ -87,6 +87,13 @@ function receivedData(data, socket){
             }
         }
     }
+    // check if it's a verification request
+    else if(jsonObj.verify){
+        console.log("Got a request to verify: ", jsonObj.verify);
+        //TODO: actually verify the transaction and respond with proof!
+    }
+    
+
 
 }
 
