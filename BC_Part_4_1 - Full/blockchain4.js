@@ -6,6 +6,7 @@ const fs = require('fs');
 const MAX_TX_PER_BLOCK = 4;
 const eaterAddress = '0xDEAD';
 const BEGINNING_BALANCE = 100;
+const MINING_REWARD = 10;
 
 function saveListToFile(list, file){
     // console.log("received list to save: ", list);
@@ -185,8 +186,8 @@ class Blockchain {
         this.chain = [this.createGenesisBlock()];
         this.difficulty = 2;
         this.pendingTransactions = [];
-        this.miningReward = 10;
-        this.maxTXPerBlock = 4;
+        this.miningReward = MINING_REWARD;
+        this.maxTXPerBlock = MAX_TX_PER_BLOCK;
 
     }
 
@@ -245,6 +246,25 @@ class Blockchain {
             }
         }
         return balance;
+    }
+    getTotalCoins() {
+        let burned = 0;
+        let subtotal = (this.chain.length - 1) * this.miningReward; // no reward in genesis block
+        for (const block of this.chain) {
+            if(block.transactions != "Genesis block"){
+                for (const trans of block.transactions) {
+                    console.log("transaction: ",trans)
+                    if (trans.toAddress == eaterAddress) { // subtract burnt coins
+                        console.log("burned += ", parseInt(trans.amount));
+                        burned += parseInt(trans.amount);
+                    }
+                }
+            }
+        }
+        
+        console.log("Burned: ", burned)
+        console.log("subtotal: ", subtotal)
+        return subtotal - burned;
     }
 
 

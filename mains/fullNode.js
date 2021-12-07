@@ -31,6 +31,9 @@ log('connecting to peers...')
 const myIp = toLocalIp(me)
 const peerIps = getPeerIps(peers)
 const micaChain = new Blockchain();
+const mykey =
+    ec.keyFromPrivate('2f68d3422cee1623fcf9837a9d9884207061b44a900a9f0a5a86c680d77a84a8')
+const myWalletAddress = mykey.getPublic('hex');
 
 
 
@@ -75,6 +78,11 @@ function receivedData(data, socket){
     else if(jsonObj.balanceOfAddress){
         console.log("responding with balance: ", micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress));
         socket.write(formatMessage(micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)));
+    }
+    else if(jsonObj.getTotalCoins){
+        const response = micaChain.getTotalCoins();
+        console.log("responding with total coins: ", response);
+        socket.write(formatMessage(response));
     }
     // check if it's a headers request
     else if(jsonObj.getHeaders){
@@ -161,7 +169,7 @@ function sleep(milliseconds) {
 // mines pending transactions and then trnasmits the block header
 function recurringTask(socket){
   console.log("here");
-  if(micaChain.minePendingTransaction()){ // if there's something to mine
+  if(micaChain.minePendingTransaction(myWalletAddress)){ // if there's something to mine
       var header = micaChain.getLatestBlock().getHeader();
       socket.write(formatMessage(header));
   }
