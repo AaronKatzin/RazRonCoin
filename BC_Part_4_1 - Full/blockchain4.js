@@ -174,6 +174,10 @@ class Block {
         // return single hash, aka the root
         this.merkleRoot = hashes[0];
     }
+    getHeader(){
+        return JSON.stringify({"previousHash": String(this.previousHash) , "timestamp" : String(this.timestamp), "nonce" : String(this.nonce), "merkleRoot": String(this.merkleRoot)})
+                
+    }
     
 }
 class Blockchain {

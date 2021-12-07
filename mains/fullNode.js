@@ -84,7 +84,7 @@ function receivedData(data, socket){
         console.log("Got a request for headers history");
         if(micaChain.chain.length){ // check if blockchain contains any blocks
             for(const block in micaChain.chain){
-                var header = JSON.stringify({"previousHash": String(micaChain.chain[block].previousHash) , "timestamp" : String(micaChain.chain[block].timestamp), "nonce" : String(micaChain.chain[block].nonce), "merkleRoot": String(micaChain.chain[block].merkleRoot)})
+                var header = micaChain.chain[block].getHeader();
                 socket.write(formatMessage(header));
                 sleep(500);
             }

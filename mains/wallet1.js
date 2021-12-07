@@ -47,6 +47,7 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
     stdin.on('data', data => { //on user input
         const message = data.toString().trim()
         if (message === 'exit') { //on exit
+            console.log("headers: ", headers)
             log('Bye bye')
             exit(0)
         }
