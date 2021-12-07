@@ -242,11 +242,11 @@ class Blockchain {
         let balance = BEGINNING_BALANCE;
         for (const block of this.chain) {
             for (const trans of block.transactions) {
-                if (trans.fromAddress === address) {
-                    balance -= trans.amount;
+                if (trans.fromAddress == address) {
+                    balance -= parseInt(trans.amount);
                 }
-                if (trans.toAddress === address) {
-                    balance += trans.amount;
+                if (trans.toAddress == address) {
+                    balance += parseInt(trans.amount);
                 }
             }
         }
@@ -257,7 +257,7 @@ class Blockchain {
     burn(fromAddress, feeAmount, transactionAmount) {
         const balance = this.getBalanceOfAddress(fromAddress);
         // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
-        if(balance < transactionAmount + feeAmount){ 
+        if(balance < parseInt(transactionAmount) + parseInt(feeAmount)){ 
             console.log('Cannot add burn transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Burn amount: ", feeAmount);
             return false;
         }
@@ -282,8 +282,8 @@ class Blockchain {
         const balance = this.getBalanceOfAddress(transaction.fromAddress);
         // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
         const fee = this.getLatestBlock().number + 1;
-        if(balance < transaction.amount + fee){ 
-            console.log('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount);
+        if(balance < parseInt(transaction.amount) + parseInt(fee)){ 
+            console.log('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount, ". Fee: ", fee);
             return false;
         }
         if(this.burn(transaction.fromAddress, fee, transaction.amount)){ // make sure sender has enough money to cover gas fee

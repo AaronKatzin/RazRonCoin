@@ -104,9 +104,7 @@ function receivedTransaction(data){
     micaChain.pendingBurnTransactions = loadFileToList("..\\pending_burn_transaction.json");
     // TODO validate
     console.log("received TX: ", receivedTX)
-    micaChain.pendingTransactions.push(receivedTX);
-    const fee = micaChain.getLatestBlock().number + 1
-    micaChain.burn(receivedTX.fromAddress, fee)
+    micaChain.addTransaction(receivedTX);
     saveListToFile(micaChain.pendingTransactions,"..\\pending_transaction.json");
     saveListToFile(micaChain.pendingBurnTransactions,"..\\pending_burn_transaction.json");
 }
