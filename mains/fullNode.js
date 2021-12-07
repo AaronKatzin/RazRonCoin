@@ -5,7 +5,7 @@ const {
 const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
 const ec = new EC('secp256k1');
 const saveListToFile = require("..\\serialize.js").saveListToFile;
-const loadFileToList = require("..\\serialize.js").loadFileToList;
+const loadTransactionFileToList = require("..\\serialize.js").loadTransactionFileToList;
 
 const topology = require('..\\BC_Part_5 p2p\\BC_Part_5 p2p\\node_modules\\fully-connected-topology')
 const {
@@ -118,7 +118,7 @@ function receivedData(data, socket){
 function receivedTransaction(data){
     console.log("received json: ",JSON.parse(extractMessage(data.toString())));
     receivedTX = Transaction.class(JSON.parse(extractMessage(data.toString())));
-    micaChain.pendingTransactions = loadFileToList("..\\pending_transaction.json");
+    micaChain.pendingTransactions = loadTransactionFileToList("..\\pending_transaction.json");
     // TODO validate
     console.log("received TX: ", receivedTX)
     micaChain.addTransaction(receivedTX);

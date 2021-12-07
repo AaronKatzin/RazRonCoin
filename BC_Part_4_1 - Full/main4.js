@@ -1,4 +1,3 @@
-
 const {
     Blockchain,
     Transaction
@@ -6,7 +5,7 @@ const {
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 const saveListToFile = require("..\\serialize.js").saveListToFile;
-const loadFileToList = require("..\\serialize.js").loadFileToList;
+const loadTransactionFileToList = require("..\\serialize.js").loadTransactionFileToList;
 
 
 const mykey =
@@ -20,8 +19,8 @@ const tx3 = new Transaction(myWalletAddress, 'address2', 10);
 tx3.signTransaction(mykey);
 micaChain.addTransaction(tx3);
 // test serialization and de-serialization
-saveListToFile(micaChain.pendingTransactions,"pending_transaction.json");
-micaChain.pendingTransactions = loadFileToList("pending_transaction.json");
+saveListToFile(micaChain.pendingTransactions, "pending_transaction.json");
+micaChain.pendingTransactions = loadTransactionFileToList("pending_transaction.json");
 // END test serialization and de-serialization
 micaChain.minePendingTransaction(myWalletAddress);
 

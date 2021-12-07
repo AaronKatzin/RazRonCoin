@@ -8,7 +8,7 @@ const eaterAddress = '0xDEAD';
 const BEGINNING_BALANCE = 100;
 const MINING_REWARD = 10;
 
-function saveListToFile(list, file){
+function saveListToFile(list, file) {
     // console.log("received list to save: ", list);
     const jsonified = JSON.stringify(list);
     try {
@@ -29,12 +29,12 @@ function saveListToFile(list, file){
     }*/
 }
 
-function loadFileToList(file){
+function loadTransactionFileToList(file) {
     // load JSON Object list
     const objectList = JSON.parse(fs.readFileSync(file));
     const txList = [];
     //convert to strongly-typed transactions 
-    for(obj in objectList){
+    for (obj in objectList) {
         txList.push(Transaction.class(objectList[obj]));
     }
     return txList;
@@ -43,13 +43,13 @@ function loadFileToList(file){
 
 
 class Transaction {
-    constructor(fromAddress, toAddress, amount, timestamp=null, signature=null) {
+    constructor(fromAddress, toAddress, amount, timestamp = null, signature = null) {
         this.fromAddress = fromAddress;
         this.toAddress = toAddress;
         this.amount = amount;
-        if(!timestamp){
+        if (!timestamp) {
             this.timestamp = Date.now();
-        } else{
+        } else {
             this.timestamp = timestamp;
         }
         this.signature = signature;
@@ -78,14 +78,14 @@ class Transaction {
     static class(obj) {
         const tx = new Transaction(obj.fromAddress, obj.toAddress, obj.amount, obj.timestamp, obj.signature);
         return tx;
-      }
+    }
 }
 
 
 
 
 class Block {
-    
+
     constructor(timestamp, transactions, previousHash = '', previousNumber = -1, prevMerkleRoot = '', prevNonce = 0) {
 
         var bloom = require('./bloomfilter.js');
@@ -95,35 +95,34 @@ class Block {
         this.hash = this.calculateHash();
         this.nonce = 0;
         this.number = previousNumber + 1;
-        if(transactions == "Genesis block"){
+        if (transactions == "Genesis block") {
             this.merkleRoot = SHA256("Genesis block");
         } else {
             this.setMerkleRoot();
         }
 
-        this.filter = new bloom(transactions.length);  //creates and populates a bloomfilter with the transactions
-        for (var i = 0; i < transactions.length; i++)
-        {
+        this.filter = new bloom(transactions.length); //creates and populates a bloomfilter with the transactions
+        for (var i = 0; i < transactions.length; i++) {
             this.filter.add(transactions[i]);
-            
+
         }
-        
+
     }
 
 
     BloomFilterTransactionCheck(transactionID) { //checks if a transaction exists using the bloom filter (still needs the merkle tree application after it returns true)
-        
+
         //to do use the merkel root function maybe send the block to this function as well and and compare it's merkel roots to getMerkleRoot(this)?
 
         if (!(this.filter.test(transactionID)))
             return false;
         else
-            for (var i = 0; i < this.transactions.length; i++){ //this part is just a place holder for now needs to be done with merkel tree and merkel root application
+            for (var i = 0; i < this.transactions.length; i++) { //this part is just a place holder for now needs to be done with merkel tree and merkel root application
                 if (this.transactions[i] == transactionID)
                     return true;
             }
         return false;
-            
+
     }
 
     calculateHash() {
@@ -145,19 +144,19 @@ class Block {
         }
         return true;
     }
-    setMerkleRoot(){
-    
+    setMerkleRoot() {
+
         // deal with empty block
-        if (this.transactions.length == 0){
+        if (this.transactions.length == 0) {
             return "0";
         }
-        
+
         // create array of hashes of the block transactions
         let hashes = [];
         for (const tx of this.transactions) {
             hashes.push(tx.calculateHash());
         }
-     
+
         // calculate next level of hashes until we get a single hash, aka the root
         while (hashes.length > 1) {
             // deal with odd number of hashes by duplicating one of them
@@ -166,8 +165,8 @@ class Block {
             }
             let nextLevel = [];
             // calculate next level of hashes
-            for (let i = 0; i < hashes.length; i+=2) { 
-                nextLevel.push(SHA256(hashes[i] + hashes[i+1]).toString());
+            for (let i = 0; i < hashes.length; i += 2) {
+                nextLevel.push(SHA256(hashes[i] + hashes[i + 1]).toString());
             }
             // replace curr level of hashes with next level of hashes for next while iteration
             hashes = nextLevel;
@@ -175,11 +174,16 @@ class Block {
         // return single hash, aka the root
         this.merkleRoot = hashes[0];
     }
-    getHeader(){
-        return JSON.stringify({"previousHash": String(this.previousHash) , "timestamp" : String(this.timestamp), "nonce" : String(this.nonce), "merkleRoot": String(this.merkleRoot)})
-                
+    getHeader() {
+        return JSON.stringify({
+            "previousHash": String(this.previousHash),
+            "timestamp": String(this.timestamp),
+            "nonce": String(this.nonce),
+            "merkleRoot": String(this.merkleRoot)
+        })
+
     }
-    
+
 }
 class Blockchain {
     constructor() {
@@ -207,15 +211,15 @@ class Blockchain {
     minePendingTransaction(miningRewardAddress = eaterAddress) {
         console.log("mining pending transactions");
         // load pending transactions from mempool
-        this.pendingTransactions = loadFileToList("..\\pending_transaction.json");
-        
-        if(this.pendingTransactions.length){
+        this.pendingTransactions = loadTransactionFileToList("..\\pending_transaction.json");
+
+        if (this.pendingTransactions.length) {
             console.log("Found pending transactions to mine")
             const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
             const transactionsForBlock = []
             transactionsForBlock.push(rewardTx);
             // get first k pending transactions, k is number of allowed transactions per block minus one to leave space for the reward tx  
-            for (let i = 0; i < this.maxTXPerBlock - 1 && this.pendingTransactions.length; i++){
+            for (let i = 0; i < this.maxTXPerBlock - 1 && this.pendingTransactions.length; i++) {
                 const pending = this.pendingTransactions.shift();
                 transactionsForBlock.push(pending);
                 console.log("Adding from pending: ", pending);
@@ -225,10 +229,9 @@ class Blockchain {
             console.log('block succefully mined');
             this.chain.push(block);
             // save remaining pending transactions from mempool
-            saveListToFile(this.pendingTransactions,"..\\pending_transaction.json");
+            saveListToFile(this.pendingTransactions, "..\\pending_transaction.json");
             return true;
-        }
-        else{
+        } else {
             console.log("No pending transactions to mine");
             return false;
         }
@@ -251,10 +254,10 @@ class Blockchain {
         return this.getTotalMinedCoins() - this.getTotalBurnedCoins();
     }
 
-    getTotalMinedCoins(){
+    getTotalMinedCoins() {
         return (this.chain.length - 1) * this.miningReward; // subtract 1 due to no reward in genesis block
     }
-    getTotalBurnedCoins(){
+    getTotalBurnedCoins() {
         return this.getBalanceOfAddress(eaterAddress) - BEGINNING_BALANCE; // TODO remove subtraction BEGINNING_BALANCE after https://github.com/AaronKatzin/BlockchainHW1/issues/1 is fixed
     }
 
@@ -262,7 +265,7 @@ class Blockchain {
     burn(fromAddress, feeAmount, transactionAmount) {
         const balance = this.getBalanceOfAddress(fromAddress);
         // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
-        if(balance < parseInt(transactionAmount) + parseInt(feeAmount)){ 
+        if (balance < parseInt(transactionAmount) + parseInt(feeAmount)) {
             console.log('Cannot add burn transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Burn amount: ", feeAmount);
             return false;
         }
@@ -287,11 +290,11 @@ class Blockchain {
         const balance = this.getBalanceOfAddress(transaction.fromAddress);
         // console.log('Balance: ', balance, ". Transaction amount: ", transaction.amount);
         const fee = this.getLatestBlock().number + 1;
-        if(balance < parseInt(transaction.amount) + parseInt(fee)){ 
+        if (balance < parseInt(transaction.amount) + parseInt(fee)) {
             console.log('Cannot add invalid transaction, sender doesn\'t have a high enough balance to cover it.\nBalance: ', balance, ". Transaction amount: ", transaction.amount, ". Fee: ", fee);
             return false;
         }
-        if(this.burn(transaction.fromAddress, fee, transaction.amount)){ // make sure sender has enough money to cover gas fee
+        if (this.burn(transaction.fromAddress, fee, transaction.amount)) { // make sure sender has enough money to cover gas fee
             this.pendingTransactions.push(transaction);
             return true;
         }
@@ -316,39 +319,41 @@ class Blockchain {
         return true;
     }
 }
-function getMerkleRootOfTXArray(TXarray){ //instead of giving it a block here we give it a 
+
+function getMerkleRootOfTXArray(TXarray) { //instead of giving it a block here we give it a 
     //tx array
-// deal with empty block
-if (TXarray.length == 0){
-return "0";
+    // deal with empty block
+    if (TXarray.length == 0) {
+        return "0";
+    }
+
+    // create array of hashes of the block transactions
+    let hashes = [];
+    for (const tx of TXarray) {
+        hashes.push(tx.calculateHash());
+    }
+
+    // calculate next level of hashes until we get a single hash, aka the root
+    while (hashes.length > 1) {
+        // deal with odd number of hashes by duplicating one of them
+        if (hashes.length & 1) {
+            hashes.push(hashes[-1]);
+        }
+        let nextLevel = [];
+        // calculate next level of hashes
+        for (let i = 0; i < hashes.length; i += 2) {
+            nextLevel.push(SHA256(hashes[i] + hashes[i + 1]).toString());
+        }
+        // replace curr level of hashes with next level of hashes for next while iteration
+        hashes = nextLevel;
+    }
+    // return single hash, aka the root
+    return hashes[0];
 }
 
-// create array of hashes of the block transactions
-let hashes = [];
-for (const tx of TXarray) {
-hashes.push(tx.calculateHash());
-}
-
-// calculate next level of hashes until we get a single hash, aka the root
-while (hashes.length > 1) {
-// deal with odd number of hashes by duplicating one of them
-if (hashes.length & 1) {
-hashes.push(hashes[-1]);
-}
-let nextLevel = [];
-// calculate next level of hashes
-for (let i = 0; i < hashes.length; i+=2) { 
-nextLevel.push(SHA256(hashes[i] + hashes[i+1]).toString());
-}
-// replace curr level of hashes with next level of hashes for next while iteration
-hashes = nextLevel;
-}
-// return single hash, aka the root
-return hashes[0];
-}
-
-module.exports = { getMerkleRootOfTXArray };
+module.exports = {
+    getMerkleRootOfTXArray
+};
 module.exports.Blockchain = Blockchain;
 module.exports.Block = Block;
 module.exports.Transaction = Transaction;
-

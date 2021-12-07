@@ -1,9 +1,10 @@
 const fs = require('fs');
 const {
+    Blockchain,
     Transaction
 } = require('.\\BC_Part_4_1 - Full\\Blockchain4.js');
 
-function saveListToFile(list, file){
+function saveListToFile(list, file) {
     // console.log("received list to save: ", list);
     const jsonified = JSON.stringify(list);
     try {
@@ -24,14 +25,17 @@ function saveListToFile(list, file){
     }*/
 }
 
-function loadFileToList(file){
+function loadTransactionFileToList(file) {
     // load JSON Object list
     const objectList = JSON.parse(fs.readFileSync(file));
     const txList = [];
     //convert to strongly-typed transactions 
-    for(obj in objectList){
+    for (obj in objectList) {
         txList.push(Transaction.class(objectList[obj]));
     }
     return txList;
 }
-module.exports = {saveListToFile, loadFileToList};
+module.exports = {
+    saveListToFile,
+    loadTransactionFileToList
+};

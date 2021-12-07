@@ -6,7 +6,7 @@ const {
 const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
 const ec = new EC('secp256k1');
 const saveListToFile = require("..\\serialize.js").saveListToFile;
-const loadFileToList = require("..\\serialize.js").loadFileToList;
+const loadTransactionFileToList = require("..\\serialize.js").loadTransactionFileToList;
 
 const topology = require('..\\BC_Part_5 p2p\\BC_Part_5 p2p\\node_modules\\fully-connected-topology')
 const {
@@ -52,72 +52,64 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
             exit(0)
         }
 
-            const receiverPeer = extractReceiverPeer(message)
-            const splitMessage = message.split(' ')
-            if (splitMessage[0] === 'send') { // user wants to send money
-                sendTransaction(socket, splitMessage[1], splitMessage[2]);
+        const receiverPeer = extractReceiverPeer(message)
+        const splitMessage = message.split(' ')
+        if (splitMessage[0] === 'send') { // user wants to send money
+            sendTransaction(socket, splitMessage[1], splitMessage[2]);
+        } else if (message === 'balance') { // user wants to see his balance
+            console.log("requesting balance by sending: ", formatMessage("{\"balanceOfAddress\":" + myWalletAddress + "}"));
+            socket.write(formatMessage("{\"balanceOfAddress\":\"" + myWalletAddress + "\"}"));
+        } else if (splitMessage[0] === 'verify') { // user wants to verify a transaction
+            const toSend = "{\"verify\":\"" + splitMessage[1] + "\"}"
+            console.log("requesting verification of: ", toSend);
+            socket.write(formatMessage(toSend));
+        } else if (message == 'getHeaders') {
+            const formattedMessage = formatMessage("{\"getHeaders\": \"thanks\"}");
+            console.log("requesting blockchain headers by sending ", formattedMessage);
+            socket.write(formattedMessage);
+        } else if (message == 'getTotalCoins') {
+            const formattedMessage = formatMessage("{\"getTotalCoins\": \"thanks\"}");
+            console.log("requesting blockchain total coins by sending ", formattedMessage);
+            socket.write(formattedMessage);
+        } else if (message == 'getTotalMinedCoins') {
+            const formattedMessage = formatMessage("{\"getTotalMinedCoins\": \"thanks\"}");
+            console.log("requesting blockchain total coins by sending ", formattedMessage);
+            socket.write(formattedMessage);
+        } else if (message == 'getTotalBurnedCoins') {
+            const formattedMessage = formatMessage("{\"getTotalBurnedCoins\": \"thanks\"}");
+            console.log("requesting blockchain total coins by sending ", formattedMessage);
+            socket.write(formattedMessage);
+        } else if (sockets[receiverPeer]) { //message to specific peer
+            if (peerPort === receiverPeer) { //write only once
+                sockets[receiverPeer].write(formatMessage(extractMessageToSpecificPeer(message)))
             }
-            else if (message === 'balance') { // user wants to see his balance
-                console.log("requesting balance by sending: ", formatMessage("{\"balanceOfAddress\":"+ myWalletAddress +"}"));
-                socket.write(formatMessage("{\"balanceOfAddress\":\""+ myWalletAddress +"\"}"));
-            }
-            else if (splitMessage[0] === 'verify') { // user wants to verify a transaction
-                const toSend = "{\"verify\":\""+ splitMessage[1] +"\"}"
-                console.log("requesting verification of: ", toSend);
-                socket.write(formatMessage(toSend));
-            }
-            else if(message == 'getHeaders'){
-                const formattedMessage = formatMessage("{\"getHeaders\": \"thanks\"}");
-                console.log("requesting blockchain headers by sending ", formattedMessage);
-                socket.write(formattedMessage);
-            }
-            else if(message == 'getTotalCoins'){
-                const formattedMessage = formatMessage("{\"getTotalCoins\": \"thanks\"}");
-                console.log("requesting blockchain total coins by sending ", formattedMessage);
-                socket.write(formattedMessage);
-            }
-            else if(message == 'getTotalMinedCoins'){
-                const formattedMessage = formatMessage("{\"getTotalMinedCoins\": \"thanks\"}");
-                console.log("requesting blockchain total coins by sending ", formattedMessage);
-                socket.write(formattedMessage);
-            }
-            else if(message == 'getTotalBurnedCoins'){
-                const formattedMessage = formatMessage("{\"getTotalBurnedCoins\": \"thanks\"}");
-                console.log("requesting blockchain total coins by sending ", formattedMessage);
-                socket.write(formattedMessage);
-            }
-            else if (sockets[receiverPeer]) { //message to specific peer
-                if (peerPort === receiverPeer) { //write only once
-                    sockets[receiverPeer].write(formatMessage(extractMessageToSpecificPeer(message)))
-                }
-            } else { //broadcast message to everyone
-                socket.write(formatMessage(message))
-            }
+        } else { //broadcast message to everyone
+            socket.write(formatMessage(message))
         }
-    )
+    })
 
     //print data when received
     socket.on('data', data => receivedData(data, socket))
 })
 
-function receivedData(data, socket){
+function receivedData(data, socket) {
     console.log("data.toString(): ", data.toString())
     const jsonObj = JSON.parse(extractMessage(data.toString()))
 
     // check if it's a transaction
-    if(jsonObj.previousHash && jsonObj.timestamp && jsonObj.nonce && jsonObj.merkleRoot){
+    if (jsonObj.previousHash && jsonObj.timestamp && jsonObj.nonce && jsonObj.merkleRoot) {
         console.log('Adding header to array: ', jsonObj)
         headers.push(jsonObj)
     }
 
 }
 
-function extractMessage(message){
-    return message.substring(message.indexOf(">")+1,  message.length);
+function extractMessage(message) {
+    return message.substring(message.indexOf(">") + 1, message.length);
 }
 
-function sendTransaction(socket, amount, toAddress){
-    const tx1 = new Transaction(myWalletAddress,  toAddress, amount);
+function sendTransaction(socket, amount, toAddress) {
+    const tx1 = new Transaction(myWalletAddress, toAddress, amount);
     tx1.signTransaction(mykey);
     console.log("sending transaction: ", JSON.stringify(tx1));
     socket.write(formatMessage(JSON.stringify(tx1)));
