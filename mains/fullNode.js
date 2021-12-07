@@ -32,15 +32,12 @@ const myIp = toLocalIp(me)
 const peerIps = getPeerIps(peers)
 const micaChain = new Blockchain();
 
-setInterval(func1, 10000);
 
-function func1(){
-    console.log("here");
-    micaChain.minePendingTransaction();
-}
+
 
 //connect to peers
 topology(myIp, peerIps).on('connection', (socket, peerIp) => {
+    setInterval(recurringTask, 10000, socket);
     const peerPort = extractPortFromIp(peerIp)
     log('connected to peer - ', peerPort)
 
@@ -157,3 +154,12 @@ function sleep(milliseconds) {
       currentDate = Date.now();
     } while (currentDate - date < milliseconds);
   }
+
+// mines pending transactions and then trnasmits the block header
+function recurringTask(socket){
+  console.log("here");
+  if(micaChain.minePendingTransaction()){ // if there's something to mine
+      var header = micaChain.getLatestBlock().getHeader();
+      socket.write(formatMessage(header));
+  }
+}

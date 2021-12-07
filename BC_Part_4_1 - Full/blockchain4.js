@@ -231,9 +231,11 @@ class Blockchain {
             // save remaining pending transactions from mempool
             saveListToFile(this.pendingTransactions,"..\\pending_transaction.json");
             saveListToFile(this.pendingBurnTransactions,"..\\pending_burn_transaction.json");
+            return true;
         }
         else{
-            console.log("No pending transactions to mine")
+            console.log("No pending transactions to mine");
+            return false;
         }
     }
     getBalanceOfAddress(address) {
