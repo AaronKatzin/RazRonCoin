@@ -107,20 +107,20 @@ returningarray = ReturnMerkleTreeParts(z,CheckRootArray);
 
 console.log("returning array size",returningarray.length);
 
-console.log("merkle root hashed:",SHA256(returningarray[0]+returningarray[1]).toString());
-console.log("merkle root hashed with setmerkleroothashed:",setMerkleRootHashed(returningarray));
+console.log("merkle root hashed this proves the program successfully hashed 01 and 22 correctly:",SHA256(returningarray[0]+returningarray[1]).toString());
+console.log("merkle root hashed with setmerkleroothashed this proves setmerkleroothashed works:",setMerkleRootHashed(returningarray));
 
-console.log("return array[0]=",returningarray[0]);
-console.log("return array[1]=",returningarray[1]);
+console.log("return array[0]= this is 01 hash",returningarray[0]);
+console.log("return array[1]= this is 02 hash",returningarray[1]);
 
 var zhash = z.calculateHash();
  // not needed
 var zzhash = SHA256(zhash+zhash).toString();
 
-console.log("hashing trans 0 and 1 should be equal to returningarray[0]",xyhash)
-console.log("hashing trans 0 and 1 should be equal to returningarray[1]",zzhash)
-console.log("hashing xy hash and zz hash",SHA256(xyhash+zzhash).toString());
-console.log("checking the merkle hash of checkrootarray",setMerkleRootTransaction(CheckRootArray));
+console.log("hashing trans 0 and 1 should be equal to returningarray[0] hashing manually here",xyhash)
+console.log("hashing trans 2 and 2 should be equal to returningarray[1] hashing manually here",zzhash)
+console.log("hashing xy hash and zz hash hashing manually here",SHA256(xyhash+zzhash).toString());
+console.log("checking the merkle hash of checkrootarray with just setmerkleroottransaction",setMerkleRootTransaction(CheckRootArray));
 
 const CheckRootArraySize2 = [];
 CheckRootArraySize2[0]=x;
