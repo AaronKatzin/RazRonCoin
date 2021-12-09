@@ -56,7 +56,8 @@ class Transaction {
     }
 
     calculateHash() {
-        return SHA256(this.fromAddress + this.toAddress + this.amount + this.timestamp).toString();
+        let TempString = (this.fromAddress + this.toAddress + this.amount + this.timestamp).toString();
+        return SHA256(TempString).toString();
     }
     signTransaction(signingKey) {
         if (signingKey.getPublic('hex') !== this.fromAddress) {
@@ -90,13 +91,14 @@ class Block {
 
         var bloom = require('./bloomfilter.js');
         this.timestamp = timestamp;
-        this.previousHash = SHA256(previousHash + prevMerkleRoot + prevNonce);
+        let TempString = (previousHash + prevMerkleRoot + prevNonce).toString();
+        this.previousHash = SHA256(TempString).toString();
         this.transactions = transactions;
         this.hash = this.calculateHash();
         this.nonce = 0;
         this.number = previousNumber + 1;
         if (transactions == "Genesis block") {
-            this.merkleRoot = SHA256("Genesis block");
+            this.merkleRoot = SHA256("Genesis block").toString();
         } else {
             this.setMerkleRoot();
         }
@@ -126,8 +128,8 @@ class Block {
     }
 
     calculateHash() {
-        return SHA256(this.previousHash + this.timestamp +
-            JSON.stringify(this.transactions) + this.nonce).toString();
+        let TempString = (this.previousHash + this.timestamp + JSON.stringify(this.transactions) + this.nonce).toString();
+        return SHA256(TempString).toString();
     }
     mineBlock(difficulty) {
         while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join('0')) {
@@ -166,6 +168,7 @@ class Block {
             let nextLevel = [];
             // calculate next level of hashes
             for (let i = 0; i < hashes.length; i += 2) {
+                let TempString = (hashes[i] + hashes[i + 1]).toString();
                 nextLevel.push(SHA256(hashes[i] + hashes[i + 1]).toString());
             }
             // replace curr level of hashes with next level of hashes for next while iteration
