@@ -169,7 +169,7 @@ class Block {
             // calculate next level of hashes
             for (let i = 0; i < hashes.length; i += 2) {
                 let TempString = (hashes[i] + hashes[i + 1]).toString();
-                nextLevel.push(SHA256(hashes[i] + hashes[i + 1]).toString());
+                nextLevel.push(SHA256(TempString).toString());
             }
             // replace curr level of hashes with next level of hashes for next while iteration
             hashes = nextLevel;
