@@ -47,13 +47,18 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
     sockets[peerPort] = socket
     stdin.on('data', data => { //on user input
         const message = data.toString().trim()
+        const receiverPeer = extractReceiverPeer(message)
         if (message === 'exit') { //on exit
             log('Bye bye')
             exit(0)
         }
-
-        const receiverPeer = extractReceiverPeer(message)
-        if (sockets[receiverPeer]) { //message to specific peer
+        else if (message === 'saveHistory') {
+            micaChain.saveTransactionHistory();
+        }
+        else if (message === 'loadHistory') { 
+            micaChain.loadTransactionHistory();
+        }
+        else if (sockets[receiverPeer]) { //message to specific peer
             if (peerPort === receiverPeer) { //write only once
                 sockets[receiverPeer].write(formatMessage(extractMessageToSpecificPeer(message)))
             }

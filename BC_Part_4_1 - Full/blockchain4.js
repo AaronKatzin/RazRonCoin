@@ -205,6 +205,27 @@ class Blockchain {
     getLatestBlock() {
         return this.chain[this.chain.length - 1];
     }
+    
+    saveTransactionHistory(){
+        const fileName =  "..\\chain_tx_history.json"
+        let listToSave = [];
+        console.log("Saving Transaction histoy to: ", fileName)
+        for(const block in this.chain){
+            if(this.chain[block].transactions != "Genesis block"){ // avoid genesis block 
+                console.log("Block TXs: ", this.chain[block].transactions)
+                listToSave = listToSave.concat(this.chain[block].transactions);
+            }
+        }
+        console.log("final list: ", listToSave);
+        saveListToFile(listToSave, fileName);
+    }
+    loadTransactionHistory(){
+        const historyList = loadTransactionFileToList("..\\chain_tx_history.json");
+        const pendingList = loadTransactionFileToList("..\\pending_transaction.json");
+        const fullList = historyList.concat(pendingList);
+        saveListToFile(fullList, "..\\pending_transaction.json");
+        console.log("Transaction history loaded successfully!\nAdded to pending transactions")
+    }
 
     /*addBlock(newBlock) {
         newBlock.previousHash = this.getLatestBlock().hash;
