@@ -170,8 +170,8 @@ function setMerkleRootTransaction(transactions) {
     // calculate next level of hashes until we get a single hash, aka the root
     while (hashes.length > 1) {
         // deal with odd number of hashes by duplicating one of them
-        if (hashes.length & 1) {
-            hashes.push(hashes[-1]);
+        if (hashes.length & 1 ) {
+            hashes.push(hashes[hashes.length-1]);
         }
         let nextLevel = [];
         // calculate next level of hashes
@@ -199,7 +199,7 @@ function setMerkleRootHashed(transactions) {
     while (transactions.length > 1) {
         // deal with odd number of hashes by duplicating one of them
         if (transactions.length & 1) {
-            transactions.push(transactions[-1]);
+            transactions.push(transactions[transactions.length-1]);
         }
         let nextLevel = [];
         // calculate next level of hashes
