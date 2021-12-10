@@ -239,7 +239,7 @@ class Blockchain {
 
         if (this.pendingTransactions.length) {
             console.log("Found pending transactions to mine")
-            const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
+            const rewardTx = new Transaction("REWARD", miningRewardAddress, this.miningReward);
             const transactionsForBlock = []
             transactionsForBlock.push(rewardTx);
             // get first k pending transactions, k is number of allowed transactions per block minus one to leave space for the reward tx  
