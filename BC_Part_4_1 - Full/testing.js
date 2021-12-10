@@ -128,7 +128,88 @@ CheckRootArraySize2[1]=y;
 console.log("checking the merkle hash of checkrootarray2",setMerkleRootTransaction(CheckRootArraySize2));
 let returningarray2 = [];
 returningarray2 = ReturnMerkleTreeParts(x,CheckRootArraySize2);
-console.log("return array with positive numbers don't bug out hmm a bug",returningarray2[0]);
+console.log("return array with positive numbers don't bug out hmm a bug", returningarray2[0]);
+
+let returningarray3 = [];
+returningarray3 = ReturnMerkleTreeParts(z, CheckRootArray);
+
+if (returningarray3.length == 3)
+{
+    
+    console.log("calculating merkle root when length = 3", setMerkleRootTransaction(CheckRootArray));
+    let hash01 = SHA256(returningarray3[0] + returningarray3[1]).toString();
+    let hash2 = returningarray3[2];
+    let Temp0122hash = SHA256(hash01 + hash2).toString();
+
+    console.log("this should be equal to hash 01 hashing manually", hash01);
+    console.log("this should equal to 22", returningarray3[2]);
+
+
+    console.log("manually hashing 01 and 22 together this should return the merkle root", Temp0122hash);
+
+
+}
+    
+let returningarraylength2 = [];
+returningarraylength2 = ReturnMerkleTreeParts(z, CheckRootArray);
+if (returningarraylength2.length == 2)
+{
+    
+    let combineddoublehash = SHA256(returningarraylength2[0] + returningarraylength2[1]).toString();
+    console.log("the merkle root should equal to :", combineddoublehash);
+}
+    
+let temparraylength1 = [];
+temparraylength1.push(x);
+let tempxplusx = x.calculateHash() + x.calculateHash();
+console.log("calculate temp array one hash:", SHA256(tempxplusx).toString());
+console.log("checking length", temparraylength1.length);
+let returningarraylength1 = [];
+
+returningarraylength1 = ReturnMerkleTreeParts(x, temparraylength1);
+
+
+
+console.log("checking return array length", returningarraylength1.length);
+console.log("printing returningarraylength1[0]", returningarraylength1[0]);
+
+if (returningarraylength1.length == 1)
+{
+    console.log("in returnarray length 1 if");
+    console.log("this should be equal to the hashroot above", returningarraylength1[0]);
+}
+    
+let arraylength4 = [];
+
+var t1 = new Transaction(56464, 10, 6);
+var t2 = new Transaction(54654654724, 107, 66);
+var t3 = new Transaction(5465464724, 150, 64);
+var t4 = new Transaction(54684724, 180, 66);
+
+const t4array = [];
+t4array.push(t1);
+t4array.push(t2);
+t4array.push(t3);
+t4array.push(t4);
+console.log("printing t4array hash:", setMerkleRootTransaction(t4array));
+
+let returnt4array = [];
+returnt4array = ReturnMerkleTreeParts(t1, t4array);
+
+console.log("return array 4 length:", returnt4array.length);
+
+if (returnt4array.length == 2)
+{
+    let temp0123hash = returnt4array[0] + returnt4array[1];
+    let hash0123 = SHA256(temp0123hash).toString();
+    console.log("this should be the same hash as t4arrayhash:", hash0123);
+    }
+
+
+
+
+
+
 
 
 
@@ -253,11 +334,6 @@ function ReturnMerkleTreeParts(tx,txarray)
 
         }
 
-       
-        
-            
-
-
 
     }
     if (txarray.length==2)
@@ -268,6 +344,31 @@ function ReturnMerkleTreeParts(tx,txarray)
         returnarray.push(combinedhash);
         return returnarray;
     }
+    if (txarray.length == 1)
+    {
+        console.log("hello in return merkle tree parts array length 1");
+        let temparray = [];
+        console.log("printing txarray[0] in setmerkle tree parts", txarray[0].calculateHash());
+        let temp00hash = txarray[0].calculateHash() + txarray[0].calculateHash();
+        let combinedhash = SHA256(temp00hash).toString();
+        console.log("printing combinedhash in setmerkle tree parts", combinedhash);
+        let returnarray = []
+        returnarray.push(combinedhash);
+        return returnarray;
+    }
+    if (txarray.length == 4)
+    {
+        let temp01hash = txarray[0].calculateHash() + txarray[1].calculateHash();
+        let hash01 = SHA256(temp01hash).toString();
+        let temphash23 = txarray[2].calculateHash() + txarray[3].calculateHash();
+        let hash23 = SHA256(temphash23).toString();
+        let returnarray = [];
+        returnarray.push(hash01);
+        returnarray.push(hash23);
+        return returnarray;
+
+        
+        }
 }
 function calculateHashes(f) {
     var temp = (f.fromAddress + f.toAddress + f.amount + f.timestamp).toString();
