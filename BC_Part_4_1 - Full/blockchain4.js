@@ -397,7 +397,9 @@ function getMerkleRootOfTXArray(TXarray) { //instead of giving it a block here w
 }
 
 module.exports = {
-    getMerkleRootOfTXArray
+    getMerkleRootOfTXArray,
+    saveListToFile,
+    loadTransactionFileToList
 };
 module.exports.Blockchain = Blockchain;
 module.exports.Block = Block;

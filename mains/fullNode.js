@@ -2,6 +2,8 @@ const {
     Blockchain,
     Transaction
 } = require('..\\BC_Part_4_1 - Full\\Blockchain4.js');
+const loadTransactionFileToList =  require('..\\BC_Part_4_1 - Full\\Blockchain4.js').loadTransactionFileToList;
+const saveListToFile =  require('..\\BC_Part_4_1 - Full\\Blockchain4.js').saveListToFile;
 const SHA256 = require("..\\BC_Part_4_1 - Full\\node_modules\\crypto-js\\sha256");
 const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
 const ec = new EC('secp256k1');
@@ -127,7 +129,8 @@ function receivedData(data, socket){
             }
         }
     } catch (error) {
-        console.log("received message that I don't know how to parse")
+
+        console.log("received message that I don't know how to parse, error: ", error)
     }
 
 
