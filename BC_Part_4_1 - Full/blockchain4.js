@@ -17,16 +17,6 @@ function saveListToFile(list, file) {
     } catch (error) {
         console.error("Failed to save list due to: ", err);
     }
-    /*for(var obj in list){
-        const jsonified = JSON.stringify(list[obj]);
-        console.log("converting to JSON: ", list[obj]); 
-        try {
-            fs.writeFileSync(file, jsonified);
-            console.log("JSON data is saved to file:\n", jsonified);
-        } catch (error) {
-            console.error(err);
-        }
-    }*/
 }
 
 function loadTransactionFileToList(file) {

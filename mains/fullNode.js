@@ -5,8 +5,6 @@ const {
 const SHA256 = require("..\\BC_Part_4_1 - Full\\node_modules\\crypto-js\\sha256");
 const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
 const ec = new EC('secp256k1');
-const saveListToFile = require("..\\serialize.js").saveListToFile;
-const loadTransactionFileToList = require("..\\serialize.js").loadTransactionFileToList;
 
 const topology = require('..\\BC_Part_5 p2p\\BC_Part_5 p2p\\node_modules\\fully-connected-topology')
 const {

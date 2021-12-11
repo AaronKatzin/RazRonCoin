@@ -16,9 +16,6 @@ var BloomFilter = function (n, fpl = FALSE_POS_TOL) {
     this.k = Math.ceil(0.7 * (this.b / n)); //number of hash functions
     this.size = (this.b > BITS_IN_BYTE) ? (Math.ceil(this.b / BITS_IN_BYTE)) : 1;	//default size is one
     this.bitview = new BitView(new ArrayBuffer(this.size));
-
-
-
 }
 
 BloomFilter.prototype.calculateHash = function(x,b,i){
