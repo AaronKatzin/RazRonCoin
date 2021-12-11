@@ -98,32 +98,36 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
 
 function receivedData(data, socket) {
     console.log("Received message: ", data.toString())
-    const jsonObj = JSON.parse(extractMessage(data.toString()))
+    try{
+        const jsonObj = JSON.parse(extractMessage(data.toString()))
 
-    // check if it's a transaction
-    if (jsonObj.previousHash && jsonObj.timestamp && jsonObj.nonce && jsonObj.merkleRoot) {
-        console.log('Adding header to array: ', jsonObj)
-        headers.push(jsonObj)
-    }
-    else if(jsonObj.PartialMerkleTree){
-        if(jsonObj.PartialMerkleTree == "TRANSACTION CANNOT BE VERIFIED"){
-            console.log("TRANSACTION CANNOT BE VERIFIED by the full node");
+        // check if it's a transaction
+        if (jsonObj.previousHash && jsonObj.timestamp && jsonObj.nonce && jsonObj.merkleRoot) {
+            console.log('Adding header to array: ', jsonObj)
+            headers.push(jsonObj)
         }
-        else{
-            //console.log("received PartialMerkleTree string: ", jsonObj.PartialMerkleTree);
-            const trimmed = jsonObj.PartialMerkleTree.trim();
-            const PartialMerkleTreeArr = trimmed.split(",");
-            //console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
-            const merkleRoot = recreateMerkleRoot(PartialMerkleTreeArr)
-            //console.log("recreated merkle root: ", merkleRoot);
-    
-            const merkleExists = isMerkleRootInHeaders(merkleRoot);
-            console.log("merkle root returned by full node has found in existing headers?: ", merkleExists);
-        }
+        else if(jsonObj.PartialMerkleTree){
+            if(jsonObj.PartialMerkleTree == "TRANSACTION CANNOT BE VERIFIED"){
+                console.log("TRANSACTION CANNOT BE VERIFIED by the full node");
+            }
+            else{
+                //console.log("received PartialMerkleTree string: ", jsonObj.PartialMerkleTree);
+                const trimmed = jsonObj.PartialMerkleTree.trim();
+                const PartialMerkleTreeArr = trimmed.split(",");
+                //console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
+                const merkleRoot = recreateMerkleRoot(PartialMerkleTreeArr)
+                //console.log("recreated merkle root: ", merkleRoot);
         
-    }
-    else if(jsonObj.balance){
-        console.log("Your balance is: ", jsonObj.balance);
+                const merkleExists = isMerkleRootInHeaders(merkleRoot);
+                console.log("merkle root returned by full node has found in existing headers?: ", merkleExists);
+            }
+            
+        }
+        else if(jsonObj.balance){
+            console.log("Your balance is: ", jsonObj.balance);
+        }
+    } catch (error) {
+        console.log("received message that I don't know how to parse")
     }
 
 }

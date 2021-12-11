@@ -73,60 +73,64 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
 })
 
 function receivedData(data, socket){
-    const jsonObj = JSON.parse(extractMessage(data.toString()))
+    try {
+        const jsonObj = JSON.parse(extractMessage(data.toString()))
+      
 
-    // check if it's a transaction
-    if(jsonObj.fromAddress && jsonObj.toAddress && jsonObj.timestamp && jsonObj.signature){
-        //console.log('in if!!')
-        receivedTransaction(data, socket);
-    }
-     // check if it's a balance request
-    else if(jsonObj.balanceOfAddress){
-        const balance = micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)
-        console.log("responding with balance: ", balance);
-        socket.write(formatMessage("{\"balance\":\""+balance+"\"}"));
-    }
-    else if(jsonObj.getTotalCoins){
-        const response = micaChain.getTotalCoins();
-        console.log("responding with total coins: ", response);
-        socket.write(formatMessage(response));
-    }
-    else if(jsonObj.getTotalMinedCoins){
-        const response = micaChain.getTotalMinedCoins();
-        console.log("responding with total coins: ", response);
-        socket.write(formatMessage(response));
-    }
-    else if(jsonObj.getTotalBurnedCoins){
-        const response = micaChain.getTotalBurnedCoins();
-        console.log("responding with total coins: ", response);
-        socket.write(formatMessage(response));
-    }
-    // check if it's a headers request
-    else if(jsonObj.getHeaders){
-        console.log("Got a request for headers history");
-        if(micaChain.chain.length){ // check if blockchain contains any blocks
-            for(const block in micaChain.chain){
-                var header = micaChain.chain[block].getHeader();
-                socket.write(formatMessage(header));
-                sleep(500);
+        // check if it's a transaction
+        if(jsonObj.fromAddress && jsonObj.toAddress && jsonObj.timestamp && jsonObj.signature){
+            //console.log('in if!!')
+            receivedTransaction(data, socket);
+        }
+        // check if it's a balance request
+        else if(jsonObj.balanceOfAddress){
+            const balance = micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)
+            console.log("responding with balance: ", balance);
+            socket.write(formatMessage("{\"balance\":\""+balance+"\"}"));
+        }
+        else if(jsonObj.getTotalCoins){
+            const response = micaChain.getTotalCoins();
+            console.log("responding with total coins: ", response);
+            socket.write(formatMessage(response));
+        }
+        else if(jsonObj.getTotalMinedCoins){
+            const response = micaChain.getTotalMinedCoins();
+            console.log("responding with total coins: ", response);
+            socket.write(formatMessage(response));
+        }
+        else if(jsonObj.getTotalBurnedCoins){
+            const response = micaChain.getTotalBurnedCoins();
+            console.log("responding with total coins: ", response);
+            socket.write(formatMessage(response));
+        }
+        // check if it's a headers request
+        else if(jsonObj.getHeaders){
+            console.log("Got a request for headers history");
+            if(micaChain.chain.length){ // check if blockchain contains any blocks
+                for(const block in micaChain.chain){
+                    var header = micaChain.chain[block].getHeader();
+                    socket.write(formatMessage(header));
+                    sleep(500);
+                }
             }
         }
-    }
-    // check if it's a verification request
-    else if(jsonObj.verify){
-        console.log("Got a request to verify: ", jsonObj.verify);
-        const foundTXAndBlock = micaChain.findBlockContainingTX(jsonObj.verify);
+        // check if it's a verification request
+        else if(jsonObj.verify){
+            console.log("Got a request to verify: ", jsonObj.verify);
+            const foundTXAndBlock = micaChain.findBlockContainingTX(jsonObj.verify);
 
-        if(!foundTXAndBlock){
-            socket.write(formatMessage("{\"PartialMerkleTree\":\"TRANSACTION CANNOT BE VERIFIED\"}"));
+            if(!foundTXAndBlock){
+                socket.write(formatMessage("{\"PartialMerkleTree\":\"TRANSACTION CANNOT BE VERIFIED\"}"));
+            }
+            else { // transaction exists, return partial merkle tree
+                const partialMerkle = ReturnMerkleTreeParts(foundTXAndBlock[1],foundTXAndBlock[0].transactions);
+                console.log("Sending Partial Merkle Tree to SPV node: ", partialMerkle)
+                socket.write(formatMessage("{\"PartialMerkleTree\":\" " + partialMerkle + "\"}"));
+            }
         }
-        else { // transaction exists, return partial merkle tree
-            const partialMerkle = ReturnMerkleTreeParts(foundTXAndBlock[1],foundTXAndBlock[0].transactions);
-            console.log("Sending Partial Merkle Tree to SPV node: ", partialMerkle)
-            socket.write(formatMessage("{\"PartialMerkleTree\":\" " + partialMerkle + "\"}"));
-        }
+    } catch (error) {
+        console.log("received message that I don't know how to parse")
     }
-    
 
 
 }
