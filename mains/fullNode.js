@@ -117,7 +117,7 @@ function receivedData(data, socket){
         const foundTXAndBlock = micaChain.findBlockContainingTX(jsonObj.verify);
 
         if(!foundTXAndBlock){
-            socket.write(formatMessage("{\"TRANSACTION\":\" CANNOT BE VERIFIED\"}"));
+            socket.write(formatMessage("{\"PartialMerkleTree\":\"TRANSACTION CANNOT BE VERIFIED\"}"));
         }
         else { // transaction exists, return partial merkle tree
             const partialMerkle = ReturnMerkleTreeParts(foundTXAndBlock[1],foundTXAndBlock[0].transactions);

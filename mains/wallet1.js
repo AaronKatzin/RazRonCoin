@@ -103,15 +103,20 @@ function receivedData(data, socket) {
         headers.push(jsonObj)
     }
     else if(jsonObj.PartialMerkleTree){
-        console.log("received PartialMerkleTree string: ", jsonObj.PartialMerkleTree);
-        const trimmed = jsonObj.PartialMerkleTree.trim();
-        const PartialMerkleTreeArr = trimmed.split(",");
-        console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
-        const merkleRoot = recreateMerkleRoot(PartialMerkleTreeArr)
-        console.log("recreated merkle root: ", merkleRoot);
-
-        const merkleExists = isMerkleRootInHeaders(merkleRoot);
-        console.log("merkle root found in existing headers?: ", merkleExists);
+        if(jsonObj.PartialMerkleTree == "TRANSACTION CANNOT BE VERIFIED"){
+            console.log("TRANSACTION CANNOT BE VERIFIED by the full node");
+        }
+        else{
+            console.log("received PartialMerkleTree string: ", jsonObj.PartialMerkleTree);
+            const trimmed = jsonObj.PartialMerkleTree.trim();
+            const PartialMerkleTreeArr = trimmed.split(",");
+            console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
+            const merkleRoot = recreateMerkleRoot(PartialMerkleTreeArr)
+            console.log("recreated merkle root: ", merkleRoot);
+    
+            const merkleExists = isMerkleRootInHeaders(merkleRoot);
+            console.log("merkle root returned by full node has found in existing headers?: ", merkleExists);
+        }
         
     }
 
