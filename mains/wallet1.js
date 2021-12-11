@@ -7,6 +7,7 @@ const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
 const ec = new EC('secp256k1');
 const saveListToFile = require("..\\serialize.js").saveListToFile;
 const loadTransactionFileToList = require("..\\serialize.js").loadTransactionFileToList;
+const SHA256 = require("..\\BC_Part_4_1 - Full\\node_modules\\crypto-js\\sha256");
 
 const topology = require('..\\BC_Part_5 p2p\\BC_Part_5 p2p\\node_modules\\fully-connected-topology')
 const {
@@ -101,6 +102,14 @@ function receivedData(data, socket) {
         console.log('Adding header to array: ', jsonObj)
         headers.push(jsonObj)
     }
+    else if(jsonObj.PartialMerkleTree){
+        console.log("received PartialMerkleTree string: ", jsonObj.PartialMerkleTree);
+        const trimmed = jsonObj.PartialMerkleTree.trim();
+        const PartialMerkleTreeArr = trimmed.split(",");
+        console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
+        const merkleRoot = recreateMerkleRoot(PartialMerkleTreeArr)
+        console.log("recreated merkle root: ", merkleRoot);
+    }
 
 }
 
@@ -152,4 +161,36 @@ function extractReceiverPeer(message) {
 //'4000>hello' -> 'hello'
 function extractMessageToSpecificPeer(message) {
     return message.slice(5, message.length);
+}
+
+function recreateMerkleRoot(partialMerkleTree){
+
+    if (partialMerkleTree.length == 1)
+    {
+        console.log("in returnarray length 1 if");
+        console.log("this should be equal to the hashroot above", returningarraylength1[0]);
+        return partialMerkleTree[0];
+    }
+    else if (partialMerkleTree.length == 2)
+    {
+        
+        let combineddoublehash = SHA256(partialMerkleTree[0] + partialMerkleTree[1]).toString();
+        console.log("the merkle root should equal to :", combineddoublehash);
+        return combineddoublehash;
+    }
+    else if (partialMerkleTree.length == 3)
+    {
+        
+        console.log("calculating merkle root when length = 3", setMerkleRootTransaction(CheckRootArray));
+        let hash01 = SHA256(partialMerkleTree[0] + partialMerkleTree[1]).toString();
+        let hash2 = partialMerkleTree[2];
+        let Temp0122hash = SHA256(hash01 + hash2).toString();
+
+        console.log("this should be equal to hash 01 hashing manually", hash01);
+        console.log("this should equal to 22", partialMerkleTree[2]);
+        console.log("manually hashing 01 and 22 together this should return the merkle root", Temp0122hash);
+
+        return Temp0122hash;
+    }
+    return false;
 }
