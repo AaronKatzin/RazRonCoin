@@ -104,10 +104,16 @@ class Block {
         }
 
         this.filter = new bloom(transactions.length); //creates and populates a bloomfilter with the transactions
-        for (var i = 0; i < transactions.length; i++) {
-            this.filter.add(transactions[i].calculateHash());
 
+        if (transactions != "Genesis block") {
+            for (var i = 0; i < transactions.length; i++) {
+                this.filter.add(transactions[i].calculateHash());
+
+            }
+        } else { // deal with genesis block
+            this.filter.add("Genesis block");
         }
+
 
     }
 
@@ -198,6 +204,25 @@ class Blockchain {
 
     }
 
+    findBlockContainingTX(TXHash){
+        console.log("Verifying: ", TXHash);
+        for(const block in this.chain){
+            // check if bloomfilter finds hash in this block
+            if(this.chain[block].filter.test(TXHash)){
+                // manually check the block for TX due to possibility of bloom filter false positive
+                // loop over block transactions 
+                for(const tx in this.chain[block].transactions){
+                    // check if curr TX matches ours
+                    if(this.chain[block].transactions[tx].calculateHash() == TXHash){
+                        console.log("returning: ", this.chain[block])
+                        return this.chain[block];
+                    }
+                }
+            }
+        }
+        console.log("returning: false");
+        return false;
+    }
     createGenesisBlock() {
         return new Block("01/01/2019", "Genesis block", "0");
     }

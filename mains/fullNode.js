@@ -77,7 +77,7 @@ function receivedData(data, socket){
     // check if it's a transaction
     if(jsonObj.fromAddress && jsonObj.toAddress && jsonObj.timestamp && jsonObj.signature){
         console.log('in if!!')
-        receivedTransaction(data);
+        receivedTransaction(data, socket);
     }
      // check if it's a balance request
     else if(jsonObj.balanceOfAddress){
@@ -113,20 +113,28 @@ function receivedData(data, socket){
     // check if it's a verification request
     else if(jsonObj.verify){
         console.log("Got a request to verify: ", jsonObj.verify);
-        //TODO: actually verify the transaction and respond with proof!
+        const foundBlock = micaChain.findBlockContainingTX(jsonObj.verify);
+
+        if(!foundBlock){
+            socket.write(formatMessage("{\"TRANSACTION\":\" CANNOT BE VERIFIED\"}"));
+        }
+        else { // transaction exists, return partial merkle tree
+            
+        }
     }
     
 
 
 }
 
-function receivedTransaction(data){
+function receivedTransaction(data, socket){
     console.log("received json: ",JSON.parse(extractMessage(data.toString())));
     receivedTX = Transaction.class(JSON.parse(extractMessage(data.toString())));
     micaChain.pendingTransactions = loadTransactionFileToList("..\\pending_transaction.json");
     // TODO validate
     console.log("received TX: ", receivedTX)
     micaChain.addTransaction(receivedTX);
+    socket.write(formatMessage("{\"Hash of addded transaction\":\"" + receivedTX.calculateHash() + "\"}"));
     saveListToFile(micaChain.pendingTransactions,"..\\pending_transaction.json");
 }
 
