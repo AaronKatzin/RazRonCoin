@@ -31,7 +31,7 @@ log('connecting to peers...')
 
 const myIp = toLocalIp(me)
 const peerIps = getPeerIps(peers)
-const micaChain = new Blockchain();
+const RazRonCoin = new Blockchain();
 const mykey =
     ec.keyFromPrivate('2f68d3422cee1623fcf9837a9d9884207061b44a900a9f0a5a86c680d77a84a8')
 const myWalletAddress = mykey.getPublic('hex');
@@ -54,10 +54,10 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
             exit(0)
         }
         else if (message === 'saveHistory') {
-            micaChain.saveTransactionHistory();
+            RazRonCoin.saveTransactionHistory();
         }
         else if (message === 'loadHistory') { 
-            micaChain.loadTransactionHistory();
+            RazRonCoin.loadTransactionHistory();
         }
         else if (sockets[receiverPeer]) { //message to specific peer
             if (peerPort === receiverPeer) { //write only once
@@ -84,31 +84,31 @@ function receivedData(data, socket){
         }
         // check if it's a balance request
         else if(jsonObj.balanceOfAddress){
-            const balance = micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)
+            const balance = RazRonCoin.getBalanceOfAddress(jsonObj.balanceOfAddress)
             console.log("responding with balance: ", balance);
             socket.write(formatMessage("{\"balance\":\""+balance+"\"}"));
         }
         else if(jsonObj.getTotalCoins){
-            const response = micaChain.getTotalCoins();
+            const response = RazRonCoin.getTotalCoins();
             console.log("responding with total coins: ", response);
             socket.write(formatMessage(response));
         }
         else if(jsonObj.getTotalMinedCoins){
-            const response = micaChain.getTotalMinedCoins();
+            const response = RazRonCoin.getTotalMinedCoins();
             console.log("responding with total coins: ", response);
             socket.write(formatMessage(response));
         }
         else if(jsonObj.getTotalBurnedCoins){
-            const response = micaChain.getTotalBurnedCoins();
+            const response = RazRonCoin.getTotalBurnedCoins();
             console.log("responding with total coins: ", response);
             socket.write(formatMessage(response));
         }
         // check if it's a headers request
         else if(jsonObj.getHeaders){
             console.log("Got a request for headers history");
-            if(micaChain.chain.length){ // check if blockchain contains any blocks
-                for(const block in micaChain.chain){
-                    var header = micaChain.chain[block].getHeader();
+            if(RazRonCoin.chain.length){ // check if blockchain contains any blocks
+                for(const block in RazRonCoin.chain){
+                    var header = RazRonCoin.chain[block].getHeader();
                     socket.write(formatMessage(header));
                     sleep(500);
                 }
@@ -117,7 +117,7 @@ function receivedData(data, socket){
         // check if it's a verification request
         else if(jsonObj.verify){
             console.log("Got a request to verify: ", jsonObj.verify);
-            const foundTXAndBlock = micaChain.findBlockContainingTX(jsonObj.verify);
+            const foundTXAndBlock = RazRonCoin.findBlockContainingTX(jsonObj.verify);
 
             if(!foundTXAndBlock){
                 socket.write(formatMessage("{\"PartialMerkleTree\":\"TRANSACTION CANNOT BE VERIFIED\"}"));
@@ -138,12 +138,12 @@ function receivedData(data, socket){
 function receivedTransaction(data, socket){
     //console.log("received json: ",JSON.parse(extractMessage(data.toString())));
     receivedTX = Transaction.class(JSON.parse(extractMessage(data.toString())));
-    micaChain.pendingTransactions = loadTransactionFileToList("..\\pending_transaction.json");
+    RazRonCoin.pendingTransactions = loadTransactionFileToList("..\\pending_transaction.json");
     // TODO validate
     console.log("received TX: ", receivedTX)
-    micaChain.addTransaction(receivedTX);
+    RazRonCoin.addTransaction(receivedTX);
     socket.write(formatMessage("{\"Hash of addded transaction\":\"" + receivedTX.calculateHash() + "\"}"));
-    saveListToFile(micaChain.pendingTransactions,"..\\pending_transaction.json");
+    saveListToFile(RazRonCoin.pendingTransactions,"..\\pending_transaction.json");
 }
 
 
@@ -200,8 +200,8 @@ function sleep(milliseconds) {
 // mines pending transactions and then trnasmits the block header
 function recurringTask(socket){
   //console.log("here");
-  if(micaChain.minePendingTransaction(myWalletAddress)){ // if there's something to mine
-      var header = micaChain.getLatestBlock().getHeader();
+  if(RazRonCoin.minePendingTransaction(myWalletAddress)){ // if there's something to mine
+      var header = RazRonCoin.getLatestBlock().getHeader();
       socket.write(formatMessage(header));
   }
 }
