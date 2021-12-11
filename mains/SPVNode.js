@@ -2,14 +2,14 @@ const prompt = require('prompt');
 const {
     Blockchain,
     Transaction
-} = require('..\\BC_Part_4_1 - Full\\Blockchain4.js');
-const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
+} = require('../BC_Part_4_1 - Full/Blockchain4.js');
+const EC = require('../BC_Part_4_1 - Full/node_modules/elliptic/lib/elliptic').ec;
 const ec = new EC('secp256k1');
-const saveListToFile = require("..\\serialize.js").saveListToFile;
-const loadTransactionFileToList = require("..\\serialize.js").loadTransactionFileToList;
-const SHA256 = require("..\\BC_Part_4_1 - Full\\node_modules\\crypto-js\\sha256");
+const saveListToFile = require("../serialize.js").saveListToFile;
+const loadTransactionFileToList = require("../serialize.js").loadTransactionFileToList;
+const SHA256 = require("../BC_Part_4_1 - Full/node_modules/crypto-js/sha256");
 
-const topology = require('..\\BC_Part_5 p2p\\BC_Part_5 p2p\\node_modules\\fully-connected-topology')
+const topology = require('../BC_Part_5 p2p/BC_Part_5 p2p/node_modules/fully-connected-topology')
 const {
     stdin,
     exit,
@@ -19,6 +19,7 @@ const {
     log
 } = console
 const {
+    wallet,
     me,
     peers
 } = extractPeersAndMyPort()
@@ -30,8 +31,10 @@ log('me - ', me)
 log('peers - ', peers)
 log('connecting to peers...')
 
+
 const mykey =
-    ec.keyFromPrivate('50c963fdb1557d9caa85be8e8c8846dc31b1af8fb9d2e9e2cdf13d758a325030')
+    ec.keyFromPrivate(wallet);
+console.log("Your wallet private address: ",wallet)
 const myWalletAddress = mykey.getPublic('hex');
 
 
@@ -140,8 +143,9 @@ function sendTransaction(socket, amount, toAddress) {
 //extract ports from process arguments, {me: first_port, peers: rest... }
 function extractPeersAndMyPort() {
     return {
-        me: argv[2],
-        peers: argv.slice(3, argv.length)
+        wallet: argv[2],
+        me: argv[3],
+        peers: argv.slice(4, argv.length)
     }
 }
 
