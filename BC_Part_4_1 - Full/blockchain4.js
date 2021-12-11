@@ -105,7 +105,7 @@ class Block {
 
         this.filter = new bloom(transactions.length); //creates and populates a bloomfilter with the transactions
         for (var i = 0; i < transactions.length; i++) {
-            this.filter.add(transactions[i]);
+            this.filter.add(transactions[i].calculateHash());
 
         }
 
