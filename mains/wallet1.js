@@ -109,6 +109,10 @@ function receivedData(data, socket) {
         console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
         const merkleRoot = recreateMerkleRoot(PartialMerkleTreeArr)
         console.log("recreated merkle root: ", merkleRoot);
+
+        const merkleExists = isMerkleRootInHeaders(merkleRoot);
+        console.log("merkle root found in existing headers?: ", merkleExists);
+        
     }
 
 }
@@ -191,6 +195,15 @@ function recreateMerkleRoot(partialMerkleTree){
         console.log("manually hashing 01 and 22 together this should return the merkle root", Temp0122hash);
 
         return Temp0122hash;
+    }
+    return false;
+}
+
+function isMerkleRootInHeaders(root){
+    for(const header in headers){
+        if(headers[header].merkleRoot == root){
+            return true;
+        }
     }
     return false;
 }
