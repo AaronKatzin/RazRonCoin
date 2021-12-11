@@ -2,6 +2,7 @@ const {
     Blockchain,
     Transaction
 } = require('..\\BC_Part_4_1 - Full\\Blockchain4.js');
+const SHA256 = require("..\\BC_Part_4_1 - Full\\node_modules\\crypto-js\\sha256");
 const EC = require('..\\BC_Part_4_1 - Full\\node_modules\\elliptic').ec;
 const ec = new EC('secp256k1');
 const saveListToFile = require("..\\serialize.js").saveListToFile;
@@ -113,13 +114,15 @@ function receivedData(data, socket){
     // check if it's a verification request
     else if(jsonObj.verify){
         console.log("Got a request to verify: ", jsonObj.verify);
-        const foundBlock = micaChain.findBlockContainingTX(jsonObj.verify);
+        const foundTXAndBlock = micaChain.findBlockContainingTX(jsonObj.verify);
 
-        if(!foundBlock){
+        if(!foundTXAndBlock){
             socket.write(formatMessage("{\"TRANSACTION\":\" CANNOT BE VERIFIED\"}"));
         }
         else { // transaction exists, return partial merkle tree
-            
+            const partialMerkle = ReturnMerkleTreeParts(foundTXAndBlock[1],foundTXAndBlock[0].transactions);
+            console.log("Sending Partial Merkle Tree to SPV node: ", partialMerkle)
+            socket.write(formatMessage("{\"PartialMerkleTree\":\" " + partialMerkle + "\"}"));
         }
     }
     
@@ -196,4 +199,112 @@ function recurringTask(socket){
       var header = micaChain.getLatestBlock().getHeader();
       socket.write(formatMessage(header));
   }
+}
+
+function ReturnMerkleTreeParts(tx,txarray)
+{
+    console.log("array length:",txarray.length);
+    if (txarray.length==3)
+    {
+        if ((tx==txarray[0])||(tx==txarray[1])){
+            console.log("hello in if");
+            let temparray=[];
+            temparray.push(txarray[2]);
+            temparray.push(txarray[2]);
+            let combinedhash=setMerkleRootTransaction(temparray);
+            let returnarray=[];
+            returnarray[0]=txarray[0].calculateHash();
+            returnarray[1]=txarray[1].calculateHash();
+            returnarray[2]=combinedhash;
+            return returnarray;
+
+
+
+        }
+        if (tx==txarray[2]){
+            console.log("hello in if tx==2");
+            let temparray1=[];
+            temparray1.push(txarray[0]);
+            temparray1.push(txarray[1]);
+            let combinedhash1=setMerkleRootTransaction(temparray1);
+
+            let temparray2=[];
+            temparray2.push(txarray[2]);
+            temparray2.push(txarray[2]);
+            let combinedhash2=setMerkleRootTransaction(temparray2);
+            let returnarray=[];
+            returnarray[0]=combinedhash1;
+            returnarray[1]=combinedhash2;
+            return returnarray;
+
+
+        }
+
+
+    }
+    if (txarray.length==2)
+    {
+        console.log("hello in txarraylength==2");
+        let combinedhash=setMerkleRootTransaction(txarray);
+        let returnarray=[];
+        returnarray.push(combinedhash);
+        return returnarray;
+    }
+    if (txarray.length == 1)
+    {
+        console.log("hello in return merkle tree parts array length 1");
+        let temparray = [];
+        console.log("printing txarray[0] in setmerkle tree parts", txarray[0].calculateHash());
+        let temp00hash = txarray[0].calculateHash() + txarray[0].calculateHash();
+        let combinedhash = SHA256(temp00hash).toString();
+        console.log("printing combinedhash in setmerkle tree parts", combinedhash);
+        let returnarray = []
+        returnarray.push(combinedhash);
+        return returnarray;
+    }
+    if (txarray.length == 4)
+    {
+        let temp01hash = txarray[0].calculateHash() + txarray[1].calculateHash();
+        let hash01 = SHA256(temp01hash).toString();
+        let temphash23 = txarray[2].calculateHash() + txarray[3].calculateHash();
+        let hash23 = SHA256(temphash23).toString();
+        let returnarray = [];
+        returnarray.push(hash01);
+        returnarray.push(hash23);
+        return returnarray;
+
+        
+        }
+}
+
+function setMerkleRootTransaction(transactions) {
+
+    // deal with empty block
+    if (transactions.length == 0) {
+        return "0";
+    }
+
+    // create array of hashes of the block transactions
+    let hashes = [];
+    for (const tx of transactions) {
+        hashes.push(tx.calculateHash());
+    }
+
+    // calculate next level of hashes until we get a single hash, aka the root
+    while (hashes.length > 1) {
+        // deal with odd number of hashes by duplicating one of them
+        if (hashes.length & 1 ) {
+            hashes.push(hashes[hashes.length-1]);
+        }
+        let nextLevel = [];
+        // calculate next level of hashes
+        for (let i = 0; i < hashes.length; i += 2) {
+            let TempString = (hashes[i] + hashes[i + 1]).toString();
+            nextLevel.push(SHA256(TempString).toString());
+        }
+        // replace curr level of hashes with next level of hashes for next while iteration
+        hashes = nextLevel;
+    }
+    // return single hash, aka the root
+    return hashes[0];
 }

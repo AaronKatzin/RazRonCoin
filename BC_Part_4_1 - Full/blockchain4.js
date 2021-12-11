@@ -214,8 +214,8 @@ class Blockchain {
                 for(const tx in this.chain[block].transactions){
                     // check if curr TX matches ours
                     if(this.chain[block].transactions[tx].calculateHash() == TXHash){
-                        console.log("returning: ", this.chain[block])
-                        return this.chain[block];
+                        console.log("returning: ", [this.chain[block], this.chain[block].transactions[tx]])
+                        return [this.chain[block], this.chain[block].transactions[tx]];
                     }
                 }
             }
