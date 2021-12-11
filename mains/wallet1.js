@@ -94,7 +94,7 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
 })
 
 function receivedData(data, socket) {
-    console.log("data.toString(): ", data.toString())
+    console.log("Received message: ", data.toString())
     const jsonObj = JSON.parse(extractMessage(data.toString()))
 
     // check if it's a transaction
@@ -107,17 +107,20 @@ function receivedData(data, socket) {
             console.log("TRANSACTION CANNOT BE VERIFIED by the full node");
         }
         else{
-            console.log("received PartialMerkleTree string: ", jsonObj.PartialMerkleTree);
+            //console.log("received PartialMerkleTree string: ", jsonObj.PartialMerkleTree);
             const trimmed = jsonObj.PartialMerkleTree.trim();
             const PartialMerkleTreeArr = trimmed.split(",");
-            console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
+            //console.log("received PartialMerkleTree arrayed: ", PartialMerkleTreeArr)
             const merkleRoot = recreateMerkleRoot(PartialMerkleTreeArr)
-            console.log("recreated merkle root: ", merkleRoot);
+            //console.log("recreated merkle root: ", merkleRoot);
     
             const merkleExists = isMerkleRootInHeaders(merkleRoot);
             console.log("merkle root returned by full node has found in existing headers?: ", merkleExists);
         }
         
+    }
+    else if(jsonObj.balance){
+        console.log("Your balance is: ", jsonObj.balance);
     }
 
 }
@@ -176,28 +179,28 @@ function recreateMerkleRoot(partialMerkleTree){
 
     if (partialMerkleTree.length == 1)
     {
-        console.log("in returnarray length 1 if");
-        console.log("this should be equal to the hashroot above", returningarraylength1[0]);
+        //console.log("in returnarray length 1 if");
+        //console.log("this should be equal to the hashroot above", returningarraylength1[0]);
         return partialMerkleTree[0];
     }
     else if (partialMerkleTree.length == 2)
     {
         
         let combineddoublehash = SHA256(partialMerkleTree[0] + partialMerkleTree[1]).toString();
-        console.log("the merkle root should equal to :", combineddoublehash);
+        //console.log("the merkle root should equal to :", combineddoublehash);
         return combineddoublehash;
     }
     else if (partialMerkleTree.length == 3)
     {
         
-        console.log("calculating merkle root when length = 3", setMerkleRootTransaction(CheckRootArray));
+        //console.log("calculating merkle root when length = 3", setMerkleRootTransaction(CheckRootArray));
         let hash01 = SHA256(partialMerkleTree[0] + partialMerkleTree[1]).toString();
         let hash2 = partialMerkleTree[2];
         let Temp0122hash = SHA256(hash01 + hash2).toString();
 
-        console.log("this should be equal to hash 01 hashing manually", hash01);
-        console.log("this should equal to 22", partialMerkleTree[2]);
-        console.log("manually hashing 01 and 22 together this should return the merkle root", Temp0122hash);
+        //console.log("this should be equal to hash 01 hashing manually", hash01);
+        //console.log("this should equal to 22", partialMerkleTree[2]);
+        //console.log("manually hashing 01 and 22 together this should return the merkle root", Temp0122hash);
 
         return Temp0122hash;
     }

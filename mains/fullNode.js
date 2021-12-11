@@ -77,13 +77,14 @@ function receivedData(data, socket){
 
     // check if it's a transaction
     if(jsonObj.fromAddress && jsonObj.toAddress && jsonObj.timestamp && jsonObj.signature){
-        console.log('in if!!')
+        //console.log('in if!!')
         receivedTransaction(data, socket);
     }
      // check if it's a balance request
     else if(jsonObj.balanceOfAddress){
-        console.log("responding with balance: ", micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress));
-        socket.write(formatMessage(micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)));
+        const balance = micaChain.getBalanceOfAddress(jsonObj.balanceOfAddress)
+        console.log("responding with balance: ", balance);
+        socket.write(formatMessage("{\"balance\":\""+balance+"\"}"));
     }
     else if(jsonObj.getTotalCoins){
         const response = micaChain.getTotalCoins();
@@ -131,7 +132,7 @@ function receivedData(data, socket){
 }
 
 function receivedTransaction(data, socket){
-    console.log("received json: ",JSON.parse(extractMessage(data.toString())));
+    //console.log("received json: ",JSON.parse(extractMessage(data.toString())));
     receivedTX = Transaction.class(JSON.parse(extractMessage(data.toString())));
     micaChain.pendingTransactions = loadTransactionFileToList("..\\pending_transaction.json");
     // TODO validate
@@ -194,7 +195,7 @@ function sleep(milliseconds) {
 
 // mines pending transactions and then trnasmits the block header
 function recurringTask(socket){
-  console.log("here");
+  //console.log("here");
   if(micaChain.minePendingTransaction(myWalletAddress)){ // if there's something to mine
       var header = micaChain.getLatestBlock().getHeader();
       socket.write(formatMessage(header));
@@ -203,11 +204,11 @@ function recurringTask(socket){
 
 function ReturnMerkleTreeParts(tx,txarray)
 {
-    console.log("array length:",txarray.length);
+    //console.log("array length:",txarray.length);
     if (txarray.length==3)
     {
         if ((tx==txarray[0])||(tx==txarray[1])){
-            console.log("hello in if");
+            //console.log("hello in if");
             let temparray=[];
             temparray.push(txarray[2]);
             temparray.push(txarray[2]);
@@ -222,7 +223,7 @@ function ReturnMerkleTreeParts(tx,txarray)
 
         }
         if (tx==txarray[2]){
-            console.log("hello in if tx==2");
+            //console.log("hello in if tx==2");
             let temparray1=[];
             temparray1.push(txarray[0]);
             temparray1.push(txarray[1]);
@@ -244,7 +245,7 @@ function ReturnMerkleTreeParts(tx,txarray)
     }
     if (txarray.length==2)
     {
-        console.log("hello in txarraylength==2");
+        //console.log("hello in txarraylength==2");
         let combinedhash=setMerkleRootTransaction(txarray);
         let returnarray=[];
         returnarray.push(combinedhash);
@@ -252,12 +253,12 @@ function ReturnMerkleTreeParts(tx,txarray)
     }
     if (txarray.length == 1)
     {
-        console.log("hello in return merkle tree parts array length 1");
+        //console.log("hello in return merkle tree parts array length 1");
         let temparray = [];
-        console.log("printing txarray[0] in setmerkle tree parts", txarray[0].calculateHash());
+        //console.log("printing txarray[0] in setmerkle tree parts", txarray[0].calculateHash());
         let temp00hash = txarray[0].calculateHash() + txarray[0].calculateHash();
         let combinedhash = SHA256(temp00hash).toString();
-        console.log("printing combinedhash in setmerkle tree parts", combinedhash);
+        //console.log("printing combinedhash in setmerkle tree parts", combinedhash);
         let returnarray = []
         returnarray.push(combinedhash);
         return returnarray;
