@@ -270,8 +270,14 @@ class Blockchain {
             // get first k pending transactions, k is number of allowed transactions per block minus one to leave space for the reward tx  
             for (let i = 0; i < this.maxTXPerBlock - 1 && this.pendingTransactions.length; i++) {
                 const pending = this.pendingTransactions.shift();
-                transactionsForBlock.push(pending);
-                console.log("Adding from pending: ", pending);
+                // check if sender is double spending
+                if(this.getBalanceOfAddress(pending.fromAddress) >= pending.amount){
+                    transactionsForBlock.push(pending);
+                    console.log("Adding from pending: ", pending);
+                }
+                else{
+                    console.log("Invalid pending transaction, double spending. Not added to block.");
+                }
             }
             let block = new Block(Date.now(), transactionsForBlock, this.getLatestBlock().hash, this.getLatestBlock().number, this.getLatestBlock().merkleRoot, this.getLatestBlock().nonce);
             block.mineBlock(this.difficulty);
